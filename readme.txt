@@ -8,7 +8,6 @@ Stable tag: 1.0
 
 Zemanta recommends your content to new audiences both on your blog and across our network of high-quality sites.
 
-
 == Description ==
 
 Zemanta Related Posts can increase your internal traffic up to 10%. Zemanta also brings new visitors from other sites and bumps your site's unique visits. Add Related Rosts from your own site and from across the web. Search for posts and hand-pick them with ease.
