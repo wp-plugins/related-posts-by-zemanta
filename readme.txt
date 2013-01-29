@@ -4,9 +4,10 @@ Tags: zemanta,related,posts,post,related posts,plugin,related content
 License: GPLv2
 Requires at least: 3.3
 Tested up to: 3.5
-Stable tag: 1.0
+Stable tag: 1.1
 
 Zemanta recommends your content to new audiences both on your blog and across our network of high-quality sites.
+
 
 == Description ==
 
@@ -47,6 +48,11 @@ No, Zemanta does not use redirects and is juice friendly. :)
 3. Zemanta Related Posts responsive theme on a Galaxy Nexus and iPhone 4s.
 
 == Changelog ==
+
+= 1.1 =
+* Limit related post age
+* Bugfix for thumbnail extraction
+
 
 = 1.0 =
 * first version

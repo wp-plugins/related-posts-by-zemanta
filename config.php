@@ -140,13 +140,23 @@ function zem_rp_upgrade() {
 	}
 }
 
+function zem_rp_related_posts_db_table_uninstall() {
+	global $wpdb;
+
+	$tags_table_name = $wpdb->prefix . "zem_rp_tags";
+
+	$sql = "DROP TABLE " . $tags_table_name;
+
+	$wpdb->query($sql);
+}
+
 function zem_rp_related_posts_db_table_install() {
 	global $wpdb;
 
 	$tags_table_name = $wpdb->prefix . "zem_rp_tags";
 	$sql_tags = "CREATE TABLE $tags_table_name (
 	  post_id mediumint(9),
-	  time timestamp DEFAULT CURRENT_TIMESTAMP,
+	  post_date datetime NOT NULL,
 	  label VARCHAR(32) NOT NULL,
 	  weight float,
 	  INDEX post_id (post_id),
@@ -205,7 +215,8 @@ function zem_rp_install() {
 		'enable_themes'				=> false,
 		'custom_theme_enabled' => false,
 		'traffic_exchange_enabled' => false,
-		'from_around_the_web' => false
+		'from_around_the_web' => false,
+		'max_related_post_age_in_days' => 0
 	);
 
 	update_option('zem_rp_meta', $zem_rp_meta);
@@ -214,21 +225,17 @@ function zem_rp_install() {
 	zem_rp_related_posts_db_table_install();
 }
 
-/* function zem_rp_migrate_1_0() {
+function zem_rp_migrate_1_0() {
 	$zem_rp_meta = get_option('zem_rp_meta');
 	$zem_rp_options = get_option('zem_rp_options');
 
 	$zem_rp_meta['version'] = '1.1';
 
-	if(isset($zem_rp_options['show_RP_in_posts'])) {
-		unset($zem_rp_options['show_RP_in_posts']);
-	}
+	$zem_rp_options['max_related_post_age_in_days'] = 0;
 
-	unset($zem_rp_meta['show_turn_on_button']);
-	unset($zem_rp_meta['turn_on_button_pressed']);
-
-	$zem_rp_meta['zemanta_username'] = false;
+	zem_rp_related_posts_db_table_uninstall();
+	zem_rp_related_posts_db_table_install();
 
 	update_option('zem_rp_options', $zem_rp_options);
 	update_option('zem_rp_meta', $zem_rp_meta);
-} */
+}

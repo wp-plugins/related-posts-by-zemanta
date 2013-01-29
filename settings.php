@@ -224,8 +224,17 @@ add_action('wp_ajax_zem_rp_is_zemanta_connected', 'zem_rp_is_zemanta_connected')
 function zem_rp_register_blog_and_login() {
 	if(zem_rp_register_blog()) {
 		$meta = zem_rp_get_meta();
+
+		$latest_post_url = '';
+		$latest_posts = get_posts(array('post_type' => 'post', 'post_status' => 'publish', 'numberposts' => 1, 'order' => 'DESC'));
+		if (count($latest_posts > 0)) {
+			$latest_post = $latest_posts[0];
+			$latest_post_url = get_permalink($latest_post->ID);
+		}
+
 		wp_redirect(ZEM_RP_ZEMANTA_DASHBOARD_URL . '?blog_id=' . $meta['blog_id'] .
-			'&auth_key=' . $meta['auth_key'], 302);
+			'&auth_key=' . $meta['auth_key'] . '&rp_admin=' . urlencode(get_admin_url()) . '&rp_post=' . urlencode($latest_post_url)
+			, 302);
 		exit;
 	} else {
 		die('something went wrong, please reload this site');
@@ -281,12 +290,10 @@ function zem_rp_settings_page() {
 			'related_posts_title_tag' => isset($postdata['zem_rp_related_posts_title_tag']) ? $postdata['zem_rp_related_posts_title_tag'] : 'h3',
 			'thumbnail_use_attached' => isset($postdata['zem_rp_thumbnail_use_attached']),
 			'thumbnail_use_custom' => isset($postdata['zem_rp_thumbnail_use_custom']) && $postdata['zem_rp_thumbnail_use_custom'] === 'yes',
-			'ctr_dashboard_enabled' => isset($postdata['zem_rp_ctr_dashboard_enabled']),
-			'promoted_content_enabled' => isset($postdata['zem_rp_promoted_content_enabled']),
 			'enable_themes' => isset($postdata['zem_rp_enable_themes']),
 			'custom_theme_enabled' => isset($postdata['zem_rp_custom_theme_enabled']),
-			'traffic_exchange_enabled' => isset($postdata['zem_rp_traffic_exchange_enabled']),
-			'from_around_the_web' => isset($postdata['zem_rp_from_around_the_web'])
+			'from_around_the_web' => isset($postdata['zem_rp_from_around_the_web']),
+			'max_related_post_age_in_days' => (isset($postdata['zem_rp_max_related_post_age_in_days']) && is_numeric(trim($postdata['zem_rp_max_related_post_age_in_days']))) ? intval(trim($postdata['zem_rp_max_related_post_age_in_days'])) : 0
 		);
 
 		if(!isset($postdata['zem_rp_exclude_categories'])) {
@@ -327,12 +334,11 @@ function zem_rp_settings_page() {
 			$new_options['default_thumbnail_path'] = $default_thumbnail_path;
 		}
 
-		if (((array) $old_options) != $new_options) {
-			if($new_options['ctr_dashboard_enabled'] && !$old_options['ctr_dashboard_enabled']) {
-				$meta['show_statistics'] = true;
-				zem_rp_update_meta($meta);
-			}
+		$new_options['ctr_dashboard_enabled'] = $old_options['ctr_dashboard_enabled'];
+		$new_options['promoted_content_enabled'] = $old_options['promoted_content_enabled'];
+		$new_options['traffic_exchange_enabled'] = $old_options['traffic_exchange_enabled'];
 
+		if (((array) $old_options) != $new_options) {
 			if(!zem_rp_update_options($new_options)) {
 				zem_rp_add_admin_notice('error', __('Failed to save settings.', 'zemanta_related_posts'));
 			} else {
@@ -386,7 +392,6 @@ function zem_rp_settings_page() {
 			</div>
 			<h2 class="title"><?php _e("Related Posts by Zemanta",'zemanta_related_posts');?></h2>
 		</div>
-		<div id="wp-rp-survey" class="updated highlight" style="display:none;"><p><?php _e("Please fill out",'zemanta_related_posts');?> <a class="link" target="_blank" href="http://wprelatedposts.polldaddy.com/s/quick-survey"><?php _e("a quick survey", 'zemanta_related_posts');?></a>.<a href="#" class="close" style="float: right;">x</a></p></div>
 
 		<?php zem_rp_print_notifications(); ?>
 
@@ -522,6 +527,18 @@ jQuery(function($) {
 							  <input name="zem_rp_max_related_posts" type="number" step="1" id="zem_rp_max_related_posts" class="small-text" min="1" value="<?php esc_attr_e($options['max_related_posts']); ?>" />
 							</td>
 						</tr>
+						<tr valign="top">
+							<th scope="row"></th>
+							<td><label>
+								<?php _e('Only show posts from the last', 'zemanta_related_posts');?>&nbsp;
+								<select name="zem_rp_max_related_post_age_in_days" id="zem_rp_max_related_post_age_in_days">
+									<option value="0" <?php selected($options['max_related_post_age_in_days'], 0); ?>>Unlimited</option>
+									<option value="30" <?php selected($options['max_related_post_age_in_days'], 30); ?>>1</option>
+									<option value="91" <?php selected($options['max_related_post_age_in_days'], 91); ?>>3</option>
+									<option value="365" <?php selected($options['max_related_post_age_in_days'], 365); ?>>12</option>
+								</select> &nbsp;months.
+							</label></td>
+						</tr>
 					</table>
 
 					<h3>Theme Settings</h3>
@@ -531,7 +548,7 @@ jQuery(function($) {
 							<td>
 								<label>
 									<input name="zem_rp_enable_themes" type="checkbox" id="zem_rp_enable_themes" value="yes"<?php checked($options["enable_themes"]); ?> />
-									<?php _e("Enable Themes",'zemanta_related_posts'); ?>*
+									<?php _e("Enable Themes",'zemanta_related_posts'); ?>
 								</label>
 								<div id="zem_rp_theme_area" style="display: none;">
 									<div class="theme-list"></div>
@@ -686,32 +703,12 @@ jQuery(function($) {
 									<input name="zem_rp_from_around_the_web" type="checkbox" id="zem_rp_from_around_the_web" value="yes"<?php checked($options['from_around_the_web']); ?>>
 									<?php _e("Enable Related Posts from around the Web",'zemanta_related_posts');?>
 								</label>
-					<?php if($meta['show_traffic_exchange']): ?>
-								<br />
-								<label>
-									<input name="zem_rp_traffic_exchange_enabled" type="checkbox" id="zem_rp_traffic_exchange_enabled" value="yes"<?php checked($options['traffic_exchange_enabled']); ?>>
-									<?php _e("Enable traffic exchange with blogger networks",'zemanta_related_posts');?>
-								</label>
-					<?php endif; ?>
-								<br />
-								<label>
-									<input name="zem_rp_ctr_dashboard_enabled" type="checkbox" id="zem_rp_ctr_dashboard_enabled" value="yes" <?php checked($options['ctr_dashboard_enabled']); ?> />
-									<?php _e("Turn statistics on",'zemanta_related_posts');?>*
-								</label>
-								<br />
-								<label>
-									<input name="zem_rp_promoted_content_enabled" type="checkbox" id="zem_rp_promoted_content_enabled" value="yes" <?php checked($options['promoted_content_enabled']); ?> />
-									<?php _e('Promoted Content', 'zemanta_related_posts');?>*
-								</label>
 							</td>
 						</tr>
 					</table>
 					<p class="submit"><input type="submit" value="<?php _e('Save changes', 'zemanta_related_posts'); ?>" class="button-primary" /></p>
 
 				</form>
-				<div>
-					* Provided via <a target="_blank" href="http://www.zemanta.com/tos/">3rd party service</a>.
-				</div>
 	<?php endif; ?>
 			</div>
 		</div>

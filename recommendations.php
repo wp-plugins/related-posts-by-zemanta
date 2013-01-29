@@ -132,14 +132,15 @@ function zem_rp_generate_tags($post) {
 			array_push($all_tags, $label);
 
 			array_push($sql_tag_values, $post->ID);
+			array_push($sql_tag_values, $post->post_date);
 			array_push($sql_tag_values, $label);
 			array_push($sql_tag_values, $weight);
 		}
 	}
 
 	if (count($all_tags) > 0 && $post->post_status == 'publish') {
-		$sql_tag_format_line = '(%d, %s, %f)';
-		$tags_insert_query = $wpdb->prepare('INSERT INTO ' . $wpdb->prefix . 'zem_rp_tags (post_id, label, weight)
+		$sql_tag_format_line = '(%d, %s, %s, %f)';
+		$tags_insert_query = $wpdb->prepare('INSERT INTO ' . $wpdb->prefix . 'zem_rp_tags (post_id, post_date, label, weight)
 				VALUES ' . implode(', ', array_fill(0, count($all_tags), $sql_tag_format_line)) . ';',
 			$sql_tag_values);
 
@@ -190,6 +191,7 @@ function zem_rp_fetch_related_posts_v2($limit = 10, $exclude_ids = array()) {
 			) as freqs
 		WHERE
 			target.post_id NOT IN (%s) AND
+			" . ($options['max_related_post_age_in_days'] > 0 ? "target.post_date > DATE_SUB(CURDATE(), INTERVAL %s DAY) AND" : "") . "
 			target.label=freqs.label AND
 			target.label IN (" . implode(', ', array_fill(0, count($tags), "%s"))  . ")" .
 			(empty($exclude_categories_labels) ? "" : " AND
@@ -204,6 +206,7 @@ function zem_rp_fetch_related_posts_v2($limit = 10, $exclude_ids = array()) {
 			array($total_number_of_posts, $total_number_of_posts),
 			$tags,
 			array($exclude_ids_str),
+			$options['max_related_post_age_in_days'] > 0 ? array($options['max_related_post_age_in_days']) : array(),
 			$tags,
 			$exclude_categories_labels,
 			array($limit * 2)
@@ -230,7 +233,7 @@ function zem_rp_fetch_related_posts_v2($limit = 10, $exclude_ids = array()) {
 			AND post.post_type = 'post'
 			AND post.post_status = 'publish'
 			AND post.post_date_gmt < %s",
-		array_merge($related_post_ids, array($now, $limit)));
+		array_merge($related_post_ids, array($now)));
 
 	$related_posts = $wpdb->get_results($post_query);
 
@@ -282,7 +285,9 @@ function zem_rp_fetch_related_posts($limit = 10, $exclude_ids = array()) {
 						) .
 						"p.post_status = 'publish'
 					AND p.post_type = 'post'
-					AND p.post_date_gmt < '$now' GROUP BY t_r.object_id
+					AND " . ($options['max_related_post_age_in_days'] == 0 ? ""
+						: "p.post_date > DATE_SUB(CURDATE(), INTERVAL " . $options['max_related_post_age_in_days'] . " DAY) AND ") .
+					    "p.post_date_gmt < '$now' GROUP BY t_r.object_id
 				ORDER BY cnt DESC, p.post_date_gmt DESC LIMIT $limit;";
 
 		$related_posts = $wpdb->get_results($q);
@@ -300,6 +305,9 @@ function zem_rp_fetch_random_posts($limit = 10, $exclude_ids = array()) {
 	$q1 = "SELECT ID FROM $wpdb->posts posts WHERE post_status = 'publish' AND post_type = 'post' AND ID NOT IN ($exclude_ids_str)";
 	if($options['exclude_categories']) {
 		$q1 .= " AND ID NOT IN (SELECT tr.object_id FROM $wpdb->term_taxonomy tt, $wpdb->term_relationships tr WHERE tt.taxonomy = 'category' AND tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.term_id IN (" . $options['exclude_categories'] . "))";
+	}
+	if($options['max_related_post_age_in_days'] > 0) {
+		$q1 .= " AND post_date > DATE_SUB(CURDATE(), INTERVAL " . $options['max_related_post_age_in_days'] . " DAY)";
 	}
 	$ids = $wpdb->get_col($q1, 0);
 	$count = count($ids);

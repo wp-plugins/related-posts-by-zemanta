@@ -13,8 +13,8 @@ function zem_rp_upload_default_thumbnail_file() {
 		} else if(isset($upload['file'])) {
 			$upload_dir = wp_upload_dir();
 
-			if (class_exists('WP_Image_Editor')) { // WP 3.5+
-				$image = WP_Image_Editor::get_instance($upload['file']);
+			if (function_exists('wp_get_image_editor')) { // WP 3.5+
+				$image = wp_get_image_editor($upload['file']);
 
 				$suffix = ZEM_RP_THUMBNAILS_WIDTH . 'x' . ZEM_RP_THUMBNAILS_HEIGHT;
 				$resized_img_path = $image->generate_filename($suffix, $upload_dir['path'], 'jpg');
@@ -123,8 +123,8 @@ function zem_rp_actually_extract_images_from_post_html($post) {
 			continue;
 		}
 
-		if (class_exists('WP_Image_Editor')) { // WP 3.5+
-			$image = WP_Image_Editor::get_instance($img_path);
+		if (function_exists('wp_get_image_editor')) { // WP 3.5+
+			$image = wp_get_image_editor($img_path);
 
 			$suffix = ZEM_RP_THUMBNAILS_WIDTH . 'x' . ZEM_RP_THUMBNAILS_HEIGHT;
 			$resized_img_path = $image->generate_filename($suffix, $upload_dir['path'], 'jpg');
