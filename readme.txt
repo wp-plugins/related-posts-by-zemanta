@@ -1,5 +1,5 @@
 ﻿=== Plugin Name ===
-Contributors: Zemanta
+Contributors: zemanta
 Tags: zemanta,related,posts,post,related posts,plugin,related content
 License: GPLv2
 Requires at least: 3.3
