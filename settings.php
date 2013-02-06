@@ -377,7 +377,7 @@ function zem_rp_settings_page() {
 
 		<?php zem_rp_print_notifications(); ?>
 
-	<?php if($meta['zemanta_username'] === false): ?>
+	<?php if(!$meta['zemanta_username']): ?>
 
 	<div id="zem_rp_login_div">
 		<p>We are almost ready. All you need to do is connect to our powerful servers. </p>

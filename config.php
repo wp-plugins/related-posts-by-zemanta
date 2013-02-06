@@ -241,6 +241,10 @@ function zem_rp_migrate_1_1() {
 
 	$zem_rp_meta['version'] = '1.2';
 
+	if (!isset($zem_rp_meta['zemanta_username'])) {
+		$zem_rp_meta['zemanta_username'] = false;
+	}
+
 	$display_options = array(
 		'display_comment_count'			=> $zem_rp_options['display_comment_count'],
 		'display_publish_date'			=> $zem_rp_options['display_publish_date'],
@@ -256,7 +260,7 @@ function zem_rp_migrate_1_1() {
 	$zem_rp_options['mobile'] = $display_options;
 
 	if ($zem_rp_options['mobile']['theme_name'] !== 'plain.css') {
-		$zem_rp_options['mobile']['theme_name'] = 'm-simple.css';
+		$zem_rp_options['mobile']['theme_name'] = 'm-stream.css';
 	}
 
 	update_option('zem_rp_options', $zem_rp_options);
@@ -289,6 +293,10 @@ function zem_rp_migrate_1_0() {
 	$zem_rp_options = get_option('zem_rp_options');
 
 	$zem_rp_meta['version'] = '1.1';
+
+	if (!isset($zem_rp_meta['zemanta_username'])) {
+		$zem_rp_meta['zemanta_username'] = false;
+	}
 
 	$zem_rp_options['max_related_post_age_in_days'] = 0;
 
