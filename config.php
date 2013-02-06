@@ -260,7 +260,7 @@ function zem_rp_migrate_1_1() {
 	$zem_rp_options['mobile'] = $display_options;
 
 	if ($zem_rp_options['mobile']['theme_name'] !== 'plain.css') {
-		$zem_rp_options['mobile']['theme_name'] = 'm-simple.css';
+		$zem_rp_options['mobile']['theme_name'] = 'm-stream.css';
 	}
 
 	update_option('zem_rp_options', $zem_rp_options);
