@@ -208,7 +208,7 @@ function zem_rp_install() {
 		'mobile' => array(
 			'display_comment_count'			=> false,
 			'display_publish_date'			=> false,
-			'display_thumbnail'			=> false,
+			'display_thumbnail'			=> true,
 			'display_excerpt'			=> false,
 			'excerpt_max_length'			=> 200,
 			'theme_name' 				=> 'm-stream.css',
@@ -218,7 +218,7 @@ function zem_rp_install() {
 		'desktop' => array(
 			'display_comment_count'			=> false,
 			'display_publish_date'			=> false,
-			'display_thumbnail'			=> false,
+			'display_thumbnail'			=> true,
 			'display_excerpt'			=> false,
 			'excerpt_max_length'			=> 200,
 			'theme_name' 				=> 'vertical-m.css',
