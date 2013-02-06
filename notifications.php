@@ -66,7 +66,7 @@ function zem_rp_load_remote_notifications() {
 		'timeout' => 5
 	);
 
-	if(empty($blog_id) || empty($auth_key) || !$options['ctr_dashboard_enabled']) return;
+	if(!$blog_id || !$auth_key || !$meta['zemanta_username']) return;
 
 	// receive remote recommendations
 	$url = ZEM_RP_CTR_DASHBOARD_URL . "notifications/?blog_id=$blog_id&auth_key=$auth_key";
@@ -115,10 +115,8 @@ function zem_rp_load_remote_notifications() {
 
 				if(isset($data->show_traffic_exchange) && $data->show_traffic_exchange) {
 					$meta['show_traffic_exchange'] = true;
-					$options['traffic_exchange_enabled'] = true;
 				} else if(isset($data->hide_traffic_exchange) && $data->hide_traffic_exchange) {
 					$meta['show_traffic_exchange'] = false;
-					$options['traffic_exchange_enabled'] = false;
 				}
 
 				zem_rp_update_meta($meta);

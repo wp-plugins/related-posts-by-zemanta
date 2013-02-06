@@ -13,7 +13,7 @@ function zem_rp_dashboard_setup() {
 	$options = zem_rp_get_options();
 	$meta = zem_rp_get_meta();
 
-	if ($options['ctr_dashboard_enabled'] && $meta['blog_id'] && $meta['auth_key']) {
+	if ($meta['blog_id'] && $meta['auth_key']) {
 		wp_add_dashboard_widget('zem_rp_dashboard_widget', 'Related Posts by Zemanta', 'zem_rp_display_dashboard_widget');
 		add_action('admin_enqueue_scripts', 'zem_rp_dashboard_scripts');
 	}
@@ -27,7 +27,7 @@ function zem_rp_display_dashboard_widget() {
 	<input type="hidden" id="zem_rp_static_base_url" value="<?php esc_attr_e(ZEM_RP_ZEMANTA_CONTENT_BASE_URL); ?>" />
 	<input type="hidden" id="zem_rp_blog_id" value="<?php esc_attr_e($meta['blog_id']); ?>" />
 	<input type="hidden" id="zem_rp_auth_key" value="<?php esc_attr_e($meta['auth_key']); ?>" />
-	<?php if($meta['show_traffic_exchange'] && $options['traffic_exchange_enabled']): ?>
+	<?php if($meta['show_traffic_exchange']): ?>
 	<input type="hidden" id="zem_rp_show_traffic_exchange_statistics" value="1" />
 	<?php endif; ?>
 

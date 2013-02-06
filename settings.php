@@ -206,10 +206,8 @@ function zem_rp_is_zemanta_connected() {
 				zem_rp_update_meta($meta);
 
 				$options = zem_rp_get_options();
-				$options['display_thumbnail'] = true;
-				$options['ctr_dashboard_enabled'] = true;
-				$options['promoted_content_enabled'] = true;
-				$options['enable_themes'] = true;
+				$options['mobile']['display_thumbnail'] = true;
+				$options['desktop']['display_thumbnail'] = true;
 				zem_rp_update_options($options);
 
 				die('yes');
@@ -229,7 +227,7 @@ function zem_rp_register_blog_and_login() {
 		$latest_posts = get_posts(array('post_type' => 'post', 'post_status' => 'publish', 'numberposts' => 1, 'order' => 'DESC'));
 		if (count($latest_posts > 0)) {
 			$latest_post = $latest_posts[0];
-			$latest_post_url = get_permalink($latest_post->ID);
+			$latest_post_url = get_permalink($latest_post->ID) . '#zem_rp_first';
 		}
 
 		wp_redirect(ZEM_RP_ZEMANTA_DASHBOARD_URL . '?blog_id=' . $meta['blog_id'] .
@@ -262,8 +260,6 @@ function zem_rp_ajax_hide_show_statistics() {
 add_action('wp_ajax_rp_show_hide_statistics', 'zem_rp_ajax_hide_show_statistics');
 
 function zem_rp_settings_page() {
-	$title_tags = array('h2', 'h3', 'h4', 'p', 'div');
-
 	$options = zem_rp_get_options();
 	$meta = zem_rp_get_meta();
 
@@ -277,23 +273,30 @@ function zem_rp_settings_page() {
 		$old_options = $options;
 		$new_options = array(
 			'on_single_post' => isset($postdata['zem_rp_on_single_post']),
-			'display_comment_count' => isset($postdata['zem_rp_display_comment_count']),
-			'display_publish_date' => isset($postdata['zem_rp_display_publish_date']),
-			'display_excerpt' => isset($postdata['zem_rp_display_excerpt']),
-			'excerpt_max_length' => (isset($postdata['zem_rp_excerpt_max_length']) && is_numeric(trim($postdata['zem_rp_excerpt_max_length']))) ? intval(trim($postdata['zem_rp_excerpt_max_length'])) : 200,
 			'max_related_posts' => (isset($postdata['zem_rp_max_related_posts']) && is_numeric(trim($postdata['zem_rp_max_related_posts']))) ? intval(trim($postdata['zem_rp_max_related_posts'])) : 5,
 			'on_rss' => isset($postdata['zem_rp_on_rss']),
-			'display_thumbnail' => isset($postdata['zem_rp_display_thumbnail']),
-			'thumbnail_custom_field' => isset($postdata['zem_rp_thumbnail_custom_field']) ? trim($postdata['zem_rp_thumbnail_custom_field']) : false,
-			'thumbnail_display_title' => isset($postdata['zem_rp_thumbnail_display_title']),
 			'related_posts_title' => isset($postdata['zem_rp_related_posts_title']) ? trim($postdata['zem_rp_related_posts_title']) : '',
-			'related_posts_title_tag' => isset($postdata['zem_rp_related_posts_title_tag']) ? $postdata['zem_rp_related_posts_title_tag'] : 'h3',
-			'thumbnail_use_attached' => isset($postdata['zem_rp_thumbnail_use_attached']),
-			'thumbnail_use_custom' => isset($postdata['zem_rp_thumbnail_use_custom']) && $postdata['zem_rp_thumbnail_use_custom'] === 'yes',
-			'enable_themes' => isset($postdata['zem_rp_enable_themes']),
-			'custom_theme_enabled' => isset($postdata['zem_rp_custom_theme_enabled']),
-			'from_around_the_web' => isset($postdata['zem_rp_from_around_the_web']),
-			'max_related_post_age_in_days' => (isset($postdata['zem_rp_max_related_post_age_in_days']) && is_numeric(trim($postdata['zem_rp_max_related_post_age_in_days']))) ? intval(trim($postdata['zem_rp_max_related_post_age_in_days'])) : 0
+			'max_related_post_age_in_days' => (isset($postdata['zem_rp_max_related_post_age_in_days']) && is_numeric(trim($postdata['zem_rp_max_related_post_age_in_days']))) ? intval(trim($postdata['zem_rp_max_related_post_age_in_days'])) : 0,
+
+			'thumbnail_use_custom' => isset($postdata['zem_rp_thumbnail_use_custom']),
+			'thumbnail_custom_field' => isset($postdata['zem_rp_thumbnail_custom_field']) ? trim($postdata['zem_rp_thumbnail_custom_field']) : '',
+
+			'mobile' => array(
+				'display_thumbnail' => isset($postdata['zem_rp_mobile_display_thumbnail']),
+				'display_comment_count' => isset($postdata['zem_rp_mobile_display_comment_count']),
+				'display_publish_date' => isset($postdata['zem_rp_mobile_display_publish_date']),
+				'display_excerpt' => isset($postdata['zem_rp_mobile_display_excerpt']),
+				'excerpt_max_length' => (isset($postdata['zem_rp_mobile_excerpt_max_length']) && is_numeric(trim($postdata['zem_rp_mobile_excerpt_max_length']))) ? intval(trim($postdata['zem_rp_mobile_excerpt_max_length'])) : 200,
+				'custom_theme_enabled' => isset($postdata['zem_rp_mobile_custom_theme_enabled'])
+			),
+			'desktop' => array(
+				'display_thumbnail' => isset($postdata['zem_rp_desktop_display_thumbnail']),
+				'display_comment_count' => isset($postdata['zem_rp_desktop_display_comment_count']),
+				'display_publish_date' => isset($postdata['zem_rp_desktop_display_publish_date']),
+				'display_excerpt' => isset($postdata['zem_rp_desktop_display_excerpt']),
+				'excerpt_max_length' => (isset($postdata['zem_rp_desktop_excerpt_max_length']) && is_numeric(trim($postdata['zem_rp_desktop_excerpt_max_length']))) ? intval(trim($postdata['zem_rp_desktop_excerpt_max_length'])) : 200,
+				'custom_theme_enabled' => isset($postdata['zem_rp_desktop_custom_theme_enabled'])
+			)
 		);
 
 		if(!isset($postdata['zem_rp_exclude_categories'])) {
@@ -304,19 +307,19 @@ function zem_rp_settings_page() {
 			$new_options['exclude_categories'] = trim($postdata['zem_rp_exclude_categories']);
 		}
 
-		$preprocess_thumbnails = $new_options['display_thumbnail'] && $new_options['thumbnail_use_attached'] && (!$old_options['display_thumbnail'] || !$old_options['thumbnail_use_attached']);
+		foreach (array('mobile', 'desktop') as $platform) {
+			if(isset($postdata['zem_rp_' . $platform . '_theme_name'])) {		// If this isn't set, maybe the AJAX didn't load...
+				$new_options[$platform]['theme_name'] = trim($postdata['zem_rp_' . $platform . '_theme_name']);
 
-		if(isset($postdata['zem_rp_theme_name'])) {		// If this isn't set, maybe the AJAX didn't load...
-			$new_options['theme_name'] = trim($postdata['zem_rp_theme_name']);
-
-			if(isset($postdata['zem_rp_theme_custom_css'])) {
-				$new_options['theme_custom_css'] = $postdata['zem_rp_theme_custom_css'];
+				if(isset($postdata['zem_rp_theme_custom_css'])) {
+					$new_options[$platform]['theme_custom_css'] = $postdata['zem_rp_' . $platform . '_theme_custom_css'];
+				} else {
+					$new_options[$platform]['theme_custom_css'] = '';
+				}
 			} else {
-				$new_options['theme_custom_css'] = '';
+				$new_options[$platform]['theme_name'] = $old_options[$platform]['theme_name'];
+				$new_options[$platform]['theme_custom_css'] = $old_options[$platform]['theme_custom_css'];
 			}
-		} else {
-			$new_options['theme_name'] = $old_options['theme_name'];
-			$new_options['theme_custom_css'] = $old_options['theme_custom_css'];
 		}
 
 		$default_thumbnail_path = zem_rp_upload_default_thumbnail_file();
@@ -334,19 +337,11 @@ function zem_rp_settings_page() {
 			$new_options['default_thumbnail_path'] = $default_thumbnail_path;
 		}
 
-		$new_options['ctr_dashboard_enabled'] = $old_options['ctr_dashboard_enabled'];
-		$new_options['promoted_content_enabled'] = $old_options['promoted_content_enabled'];
-		$new_options['traffic_exchange_enabled'] = $old_options['traffic_exchange_enabled'];
-
 		if (((array) $old_options) != $new_options) {
 			if(!zem_rp_update_options($new_options)) {
 				zem_rp_add_admin_notice('error', __('Failed to save settings.', 'zemanta_related_posts'));
 			} else {
 				zem_rp_add_admin_notice('updated', __('Settings saved.', 'zemanta_related_posts'));
-			}
-
-			if($preprocess_thumbnails) {
-				zem_rp_process_latest_post_thumbnails();
 			}
 		} else {
 			// I should duplicate success message here
@@ -356,17 +351,8 @@ function zem_rp_settings_page() {
 ?>
 
 	<div class="wrap" id="zem_rp_wrap">
-	<?php
-		$related_posts_title_tag = $options['related_posts_title_tag'];
-		$theme_name = $options['theme_name'];
-		$theme_custom_css = $options['theme_custom_css'];
-
-		include(dirname(__FILE__) . '/static/settings.js.php');
-	?>
-
 		<input type="hidden" id="zem_rp_json_url" value="<?php esc_attr_e(ZEM_RP_ZEMANTA_CONTENT_BASE_URL . ZEM_RP_STATIC_JSON_PATH); ?>" />
 		<input type="hidden" id="zem_rp_version" value="<?php esc_attr_e(ZEM_RP_VERSION); ?>" />
-		<input type="hidden" id="zem_rp_theme_selected" value="<?php esc_attr_e($theme_name); ?>" />
 		<input type="hidden" id="zem_rp_dashboard_url" value="<?php esc_attr_e(ZEM_RP_CTR_DASHBOARD_URL); ?>" />
 		<input type="hidden" id="zem_rp_static_base_url" value="<?php esc_attr_e(ZEM_RP_ZEMANTA_CONTENT_BASE_URL); ?>" />
 
@@ -375,11 +361,7 @@ function zem_rp_settings_page() {
 		<input type="hidden" id="zem_rp_auth_key" value="<?php esc_attr_e($meta['auth_key']); ?>" />
 		<?php endif; ?>
 
-		<?php if($options['ctr_dashboard_enabled']): ?>
-		<input type="hidden" id="zem_rp_ctr_dashboard_enabled" value="true" />
-		<?php endif; ?>
-
-		<?php if($meta['show_traffic_exchange'] && $options['traffic_exchange_enabled']): ?>
+		<?php if($meta['show_traffic_exchange']): ?>
 		<input type="hidden" id="zem_rp_show_traffic_exchange_statistics" value="1" />
 		<?php endif; ?>
 
@@ -387,7 +369,7 @@ function zem_rp_settings_page() {
 			<div class="support">
 				<h4><?php _e("Awesome support", 'zemanta_related_posts'); ?></h4>
 				<p>
-					<?php _e("If you have any questions please contact us at",'zemanta_related_posts');?> <a target="_blank" href="mailto:support+2013@zemanta.com"><?php _e("support", 'zemanta_related_posts');?></a>.
+					<?php _e("If you have any questions please contact us at",'zemanta_related_posts');?> <a target="_blank" href="mailto:support+relatedposts@zemanta.com"><?php _e("support", 'zemanta_related_posts');?></a>.
 				</p>
 			</div>
 			<h2 class="title"><?php _e("Related Posts by Zemanta",'zemanta_related_posts');?></h2>
@@ -489,7 +471,6 @@ jQuery(function($) {
 		<?php endif; ?>
 
 		<form method="post" enctype="multipart/form-data" action="" id="zem_rp_settings_form">
-			<?php if ($options['ctr_dashboard_enabled']): ?>
 			<div id="zem_rp_statistics_holder">
 				<div id="zem_rp_statistics_collapsible" block="statistics" class="collapsible<?php if(!$meta['show_statistics']) { echo " collapsed"; } ?>">
 					<a href="#" class="collapse-handle">Collapse</a>
@@ -501,8 +482,6 @@ jQuery(function($) {
 					</div>
 				</div>
 			</div>
-			<?php endif; ?>
-
 
 			<div id="zem_rp_dashboard"><a href="<?php echo ZEM_RP_ZEMANTA_DASHBOARD_URL; ?>" target="_blank">Open dashboard</a></div>
 
@@ -542,125 +521,103 @@ jQuery(function($) {
 					</table>
 
 					<h3>Theme Settings</h3>
-					<table class="form-table">
-						<tr id="zem_rp_theme_options_wrap">
-							<th scope="row">Select Theme:</th>
-							<td>
-								<label>
-									<input name="zem_rp_enable_themes" type="checkbox" id="zem_rp_enable_themes" value="yes"<?php checked($options["enable_themes"]); ?> />
-									<?php _e("Enable Themes",'zemanta_related_posts'); ?>
-								</label>
-								<div id="zem_rp_theme_area" style="display: none;">
-									<div class="theme-list"></div>
-									<div class="theme-screenshot"></div>
-									<div class="theme-extra-options">
-										<label>
-											<input type="checkbox" id="zem_rp_custom_theme_enabled" name="zem_rp_custom_theme_enabled" value="yes"<?php checked($options['custom_theme_enabled']); ?> />
-											Customize
-										</label>
+					<div id="zem_rp_theme_options_wrap">
+						<?php foreach (array('desktop', 'mobile') as $platform): ?>
+						<?php $titles = array('desktop' => 'Desktop/Tablet', 'mobile' => 'Mobile Phones'); ?>
+						<input type="hidden" id="zem_rp_<?php echo $platform; ?>_theme_selected" value="<?php esc_attr_e($options[$platform]['theme_name']); ?>" />
+						<table class="form-table zem_rp_settings_table">
+							<tr id="zem_rp_<?php echo $platform; ?>_theme_options_wrap">
+								<td>
+									<h4><?php _e($titles[$platform], 'zemanta_related_posts'); ?></h4>
+									<div id="zem_rp_<?php echo $platform; ?>_theme_area" style="display: none;">
+										<div class="theme-list"></div>
+										<div class="theme-screenshot"></div>
+										<div class="theme-extra-options">
+											<label class="zem_rp_settings_button">
+												<input type="checkbox" id="zem_rp_<?php echo $platform; ?>_custom_theme_enabled" name="zem_rp_<?php echo $platform; ?>_custom_theme_enabled" value="yes"<?php checked($options[$platform]['custom_theme_enabled']); ?> />
+												Customize
+											</label>
+										</div>
 									</div>
-								</div>
-							</td>
-						</tr>
-						<tr id="zem_rp_theme_custom_css_wrap" style="display: none; ">
-							<th scope="row"></th>
-							<td>
-								<p class="notice">To override default rules please add "!important" after every declaration.</p>
-								<textarea style="width: 300px; height: 215px;" name="zem_rp_theme_custom_css" class="custom-css"><?php echo htmlspecialchars($theme_custom_css, ENT_QUOTES); ?></textarea>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><?php _e("Thumbnail Options:",'zemanta_related_posts'); ?></th>
-							<td>
-								<label>
-									<input name="zem_rp_display_thumbnail" type="checkbox" id="zem_rp_display_thumbnail" value="yes"<?php checked($options["display_thumbnail"]); ?> onclick="zem_rp_display_thumbnail_onclick();" />
-									<?php _e("Display Thumbnails For Related Posts",'zemanta_related_posts');?>
-								</label>
-								<br />
-								<span id="zem_rp_thumbnail_span" style="<?php echo $options["display_thumbnail"] ? '' : 'display:none;'; ?>">
-								<label>
-									<input name="zem_rp_thumbnail_display_title" type="checkbox" id="zem_rp_thumbnail_display_title" value="yes"<?php checked($options["thumbnail_display_title"]); ?> />
-									<?php _e('Display Post Titles', 'zemanta_related_posts');?>
-								</label>
-								<br />
+								</td>
+							</tr>
+							<tr id="zem_rp_<?php echo $platform; ?>_theme_custom_css_wrap" style="display: none; ">
+								<td>
+									<label>
+										<input name="zem_rp_<?php echo $platform; ?>_display_thumbnail" type="checkbox" id="zem_rp_<?php echo $platform; ?>_display_thumbnail" value="yes"<?php checked($options[$platform]["display_thumbnail"]); ?> onclick="zem_rp_display_thumbnail_onclick();" />
+										<?php _e("Display Thumbnails For Related Posts",'zemanta_related_posts');?>
+									</label><br />
+									<label>
+										<input name="zem_rp_<?php echo $platform; ?>_display_comment_count" type="checkbox" id="zem_rp_<?php echo $platform; ?>_display_comment_count" value="yes" <?php checked($options[$platform]["display_comment_count"]); ?>>
+										<?php _e("Display Number of Comments",'zemanta_related_posts');?>
+									</label><br />
+									<label>
+										<input name="zem_rp_<?php echo $platform; ?>_display_publish_date" type="checkbox" id="zem_rp_<?php echo $platform; ?>_display_publish_date" value="yes" <?php checked($options[$platform]["display_publish_date"]); ?>>
+										<?php _e("Display Publish Date",'zemanta_related_posts');?>
+									</label><br />
+									<label>
+										<input name="zem_rp_<?php echo $platform; ?>_display_excerpt" type="checkbox" id="zem_rp_<?php echo $platform; ?>_display_excerpt" value="yes"<?php checked($options[$platform]["display_excerpt"]); ?> onclick="zem_rp_display_excerpt_onclick();" >
+										<?php _e("Display Post Excerpt",'zemanta_related_posts');?>
+									</label>
+									<label id="zem_rp_<?php echo $platform; ?>_excerpt_max_length_label">
+										<input name="zem_rp_<?php echo $platform; ?>_excerpt_max_length" type="text" id="zem_rp_<?php echo $platform; ?>_excerpt_max_length" class="small-text" value="<?php esc_attr_e($options[$platform]["excerpt_max_length"]); ?>" /> <span class="description"><?php _e('Maximum Number of Characters.', 'zemanta_related_posts'); ?></span>
+									</label>
+									<br/>
+									<h4>Custom CSS</h4>
+									<textarea style="width: 300px; height: 215px; background: #EEE;" name="zem_rp_<?php echo $platform; ?>_theme_custom_css" class="custom-css"><?php echo htmlspecialchars($options[$platform]['theme_custom_css'], ENT_QUOTES); ?></textarea>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									
+								</td>
+							</tr>
+						</table>
+						<?php endforeach; ?>
+					</div>
 
-								<?php
-								global $wpdb;
-
-								$custom_fields = $wpdb->get_col( "SELECT meta_key FROM $wpdb->postmeta GROUP BY meta_key HAVING meta_key NOT LIKE '\_%' ORDER BY LOWER(meta_key)" );
-
-								if($custom_fields) :
-								?>
-								<label><input name="zem_rp_thumbnail_use_custom" type="radio" value="no" <?php checked(!$options['thumbnail_use_custom']); ?>> Use featured image</label>&nbsp;&nbsp;&nbsp;&nbsp;
-								<label><input name="zem_rp_thumbnail_use_custom" type="radio" value="yes" <?php checked($options['thumbnail_use_custom']); ?>> Use custom field</label>
-
-								<select name="zem_rp_thumbnail_custom_field" id="zem_rp_thumbnail_custom_field"  class="postform">
-								
-								<?php foreach ( $custom_fields as $custom_field ) : ?>
-									<option value="<?php esc_attr_e($custom_field); ?>"<?php selected($options["thumbnail_custom_field"], $custom_field); ?>><?php esc_html_e($custom_field);?></option>
-								<?php endforeach; ?>
-
-								</select>
-								<br />
-								<?php endif; ?>
-
-								<label>
-									<input name="zem_rp_thumbnail_use_attached" type="checkbox" value="yes" <?php checked($options["thumbnail_use_attached"]); ?>>
-									<?php _e("If featured image is missing, show an image from the post",'zemanta_related_posts');?>
-								</label>
-								<br />
+					<table class="form-table">
+						<tbody>
+							<tr valign="top">
+								<td>
+									<label>
+										<?php _e('For posts without images, a default image will be shown.<br/>
+										You can upload your own default image here','zemanta_related_posts');?>
+										<input type="file" name="zem_rp_default_thumbnail" />
+									</label>
+									<?php if($options['default_thumbnail_path']) : ?>
+										<span style="display: inline-block; vertical-align: top; *display: inline; zoom: 1;">
+											<img style="padding: 3px; border: 1px solid #DFDFDF; border-radius: 3px;" valign="top" width="80" height="80" src="<?php esc_attr_e(zem_rp_get_default_thumbnail_url()); ?>" alt="selected thumbnail" />
+											<br />
+											<label>
+												<input type="checkbox" name="zem_rp_default_thumbnail_remove" value="yes" />
+												<?php _e("Remove selected",'zemanta_related_posts');?>
+											</label>
+										</span>
+									<?php endif; ?>
 
 
-								<br />
-								<label>
-									<?php _e('For posts without images, a default image will be shown.<br/>
-									You can upload your own default image here','zemanta_related_posts');?>
-									<input type="file" name="zem_rp_default_thumbnail" />
-								</label>
-								<?php if($options['default_thumbnail_path']) : ?>
-									<span style="display: inline-block; vertical-align: top; *display: inline; zoom: 1;">
-										<img style="padding: 3px; border: 1px solid #DFDFDF; border-radius: 3px;" valign="top" width="80" height="80" src="<?php esc_attr_e(zem_rp_get_default_thumbnail_url()); ?>" alt="selected thumbnail" />
-										<br />
-										<label>
-											<input type="checkbox" name="zem_rp_default_thumbnail_remove" value="yes" />
-											<?php _e("Remove selected",'zemanta_related_posts');?>
-										</label>
-									</span>
-								<?php endif; ?>
-								</span>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><?php _e("Display Options:",'zemanta_related_posts'); ?></th>
-							<td>
-								<label>
-									<input name="zem_rp_display_comment_count" type="checkbox" id="zem_rp_display_comment_count" value="yes" <?php checked($options["display_comment_count"]); ?>>
-									<?php _e("Display Number of Comments",'zemanta_related_posts');?>
-								</label><br />
-								<label>
-									<input name="zem_rp_display_publish_date" type="checkbox" id="zem_rp_display_publish_date" value="yes" <?php checked($options["display_publish_date"]); ?>>
-									<?php _e("Display Publish Date",'zemanta_related_posts');?>
-								</label><br />
-								<label>
-									<input name="zem_rp_display_excerpt" type="checkbox" id="zem_rp_display_excerpt" value="yes"<?php checked($options["display_excerpt"]); ?> onclick="zem_rp_display_excerpt_onclick();" >
-									<?php _e("Display Post Excerpt",'zemanta_related_posts');?>
-								</label>
-								<label id="zem_rp_excerpt_max_length_label"<?php echo $options["display_excerpt"] ? '' : ' style="display: none;"'; ?>>
-									<input name="zem_rp_excerpt_max_length" type="text" id="zem_rp_excerpt_max_length" class="small-text" value="<?php esc_attr_e($options["excerpt_max_length"]); ?>" /> <span class="description"><?php _e('Maximum Number of Characters.', 'zemanta_related_posts'); ?></span>
-								</label><br/>
-								<label for="zem_rp_related_posts_title_tag">
-									<?php _e('Related Posts Title Tag', 'zemanta_related_posts'); ?>
-									<select name="zem_rp_related_posts_title_tag" id="zem_rp_related_posts_title_tag" class="postform">
 									<?php
-									foreach ($title_tags as $tag) :
+									global $wpdb;
+
+									$custom_fields = $wpdb->get_col( "SELECT meta_key FROM $wpdb->postmeta GROUP BY meta_key HAVING meta_key NOT LIKE '\_%' ORDER BY LOWER(meta_key)" );
+									if($custom_fields) :
 									?>
-										<option value="<?php esc_attr_e($tag); ?>"<?php selected($related_posts_title_tag, $tag); ?>>&lt;<?php esc_html_e($tag); ?>&gt;</option>
+									<br />
+									<br />
+									<label><input name="zem_rp_thumbnail_use_custom" type="checkbox" value="yes" <?php checked($options['thumbnail_use_custom']); ?>> Use custom field for thumbnails</label>
+									<select name="zem_rp_thumbnail_custom_field" id="zem_rp_thumbnail_custom_field"  class="postform">
+									<?php foreach ( $custom_fields as $custom_field ) : ?>
+										<option value="<?php esc_attr_e($custom_field); ?>"<?php selected($options["thumbnail_custom_field"], $custom_field); ?>><?php esc_html_e($custom_field);?></option>
 									<?php endforeach; ?>
 									</select>
-								</label>
-							</td>
-						</tr>
+									<br />
+									<?php endif; ?>
+								</td>
+							</tr>
+						</tbody>
 					</table>
+
 					<h3><?php _e("Other Settings:",'zemanta_related_posts'); ?></h3>
 					<table class="form-table">
 						<tr valign="top">
@@ -688,6 +645,8 @@ jQuery(function($) {
 						</tr>
 						<tr valign="top">
 							<td colspan="2">
+
+								<br />
 								<label>
 									<input name="zem_rp_on_single_post" type="checkbox" id="zem_rp_on_single_post" value="yes" <?php checked($options['on_single_post']); ?>>
 									<?php _e("Auto Insert Related Posts",'zemanta_related_posts');?>
@@ -699,10 +658,6 @@ jQuery(function($) {
 									<?php _e("Display Related Posts in Feed",'zemanta_related_posts');?>
 								</label>
 								<br />
-								<label>
-									<input name="zem_rp_from_around_the_web" type="checkbox" id="zem_rp_from_around_the_web" value="yes"<?php checked($options['from_around_the_web']); ?>>
-									<?php _e("Enable Related Posts from around the Web",'zemanta_related_posts');?>
-								</label>
 							</td>
 						</tr>
 					</table>

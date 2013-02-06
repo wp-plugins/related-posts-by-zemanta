@@ -311,29 +311,27 @@ function zem_rp_fetch_random_posts($limit = 10, $exclude_ids = array()) {
 	}
 	$ids = $wpdb->get_col($q1, 0);
 	$count = count($ids);
-	if($count <= 1) {
-		if($count === 0) return false;
-		if($count === 1) $rnd = $ids;
-	} else {
+	if($count === 0) {
+		return false;
+	/*} else if($count === 1) {
+		$rnd = $ids;*/
+	} else if($count > 1) {
 		$display_number = min($limit, $count);
 
 		$next_seed = rand();
 		$t = time();
 		$seed = $t - $t % 300 + $post->ID << 4;		// We keep the same seed for 5 minutes, so MySQL can cache the `q2` query.
 		srand($seed);
+		shuffle($ids);
 
-		$rnd = array_rand($ids, $display_number);	// This is an array of random indexes, sorted
-		if ($display_number == 1) {
-			$ids = array($ids[$rnd]);
-		} else {
-			shuffle($rnd);
-			foreach ($rnd as &$i) {		// Here, index is passed by reference, so we can modify it
-				$i = $ids[$i];		// Replace indexes with corresponding IDs
-			}
-			$ids = $rnd;
-		}
+		$ids = array_slice($ids, 0, $display_number);
+
 		srand($next_seed);
 	}
 	$q2 = "SELECT ID, post_title, post_content, post_excerpt, post_date, comment_count FROM $wpdb->posts WHERE post_status = 'publish' AND post_type = 'post' AND ID IN (" . implode(',', $ids) . ")";
-	return $wpdb->get_results($q2);
+	$results = $wpdb->get_results($q2);
+	asort($ids);
+	$ids_keys = array_keys($ids);
+	array_multisort($ids_keys, $results);
+	return $results;
 }
