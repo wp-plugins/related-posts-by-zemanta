@@ -311,7 +311,7 @@ function zem_rp_settings_page() {
 			if(isset($postdata['zem_rp_' . $platform . '_theme_name'])) {		// If this isn't set, maybe the AJAX didn't load...
 				$new_options[$platform]['theme_name'] = trim($postdata['zem_rp_' . $platform . '_theme_name']);
 
-				if(isset($postdata['zem_rp_theme_custom_css'])) {
+				if(isset($postdata['zem_rp_' . $platform . '_theme_custom_css'])) {
 					$new_options[$platform]['theme_custom_css'] = $postdata['zem_rp_' . $platform . '_theme_custom_css'];
 				} else {
 					$new_options[$platform]['theme_custom_css'] = '';
