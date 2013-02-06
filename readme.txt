@@ -1,5 +1,5 @@
 ﻿=== Plugin Name ===
-Contributors: zemanta
+Contributors: Zemanta
 Tags: zemanta,related,posts,post,related posts,plugin,related content
 License: GPLv2
 Requires at least: 3.3
@@ -33,6 +33,10 @@ Yes, Zemanta is offered in different themes which you can also customize with si
 = Will Zemanta steal my "link-juice"? =
 
 No, Zemanta does not use redirects and is juice friendly. :)
+
+= Why does Zemanta have 3 similar plugins? What's the difference between them? =
+
+We adopted the principle of having three "release channels". You can try the most experimental (still stable!) features in [Related Posts](http://wordpress.org/extend/plugins/related-posts/ "Related Posts"). The more advanced ones are in [WordPress Related Posts](http://wordpress.org/extend/plugins/wordpress-23-related-posts-plugin/ "WordPress Related Posts"). If you're looking for the Professional version go for [Related Posts by Zemanta](http://wordpress.org/extend/plugins/related-posts-by-zemanta/ "Related Posts by Zemanta").
 
 
 == Installation ==
