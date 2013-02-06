@@ -372,7 +372,7 @@ function zem_rp_settings_page() {
 					<?php _e("If you have any questions please contact us at",'zemanta_related_posts');?> <a target="_blank" href="mailto:support+relatedposts@zemanta.com"><?php _e("support", 'zemanta_related_posts');?></a>.
 				</p>
 			</div>
-			<h2 class="title"><?php _e("Related Posts by Zemanta",'zemanta_related_posts');?></h2>
+			<h2 class="title"><?php _e("Related Posts by ",'zemanta_related_posts');?><a href="http://www.zemanta.com">Zemanta</a></h2>
 		</div>
 
 		<?php zem_rp_print_notifications(); ?>
