@@ -356,7 +356,7 @@ function zem_rp_head_resources() {
 			"\twindow._zem_rp_static_base_url = '" . esc_js(ZEM_RP_ZEMANTA_CONTENT_BASE_URL) . "';\n" .
 			"\twindow._zem_rp_wp_ajax_url = '" . admin_url('admin-ajax.php') . "';\n" .
 			"\twindow._zem_rp_plugin_version = '" . ZEM_RP_VERSION . "';\n" .
-			"\twindow._wp_rp_num_rel_posts = '" . $options['max_related_posts'] . "';\n" .
+			"\twindow._zem_rp_num_rel_posts = '" . $options['max_related_posts'] . "';\n" .
 			(current_user_can('edit_posts') ?
 				"\twindow._zem_rp_admin_ajax_url = '" . admin_url('admin-ajax.php') . "';\n" .
 				"\twindow._zem_rp_plugin_static_base_url = '" . esc_js(plugins_url('static/' , __FILE__)) . "';\n"
