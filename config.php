@@ -233,6 +233,8 @@ function zem_rp_install() {
 	zem_rp_register_blog();
 
 	zem_rp_related_posts_db_table_install();
+
+	zem_rp_process_latest_post_thumbnails();
 }
 
 function zem_rp_migrate_1_1() {
