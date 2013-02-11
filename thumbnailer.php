@@ -234,7 +234,6 @@ function zem_rp_get_post_thumbnail_img($related_post, $size = 'thumbnail') {
 		return $img;
 	}
 
-	$image_id = zem_rp_extract_post_image($related_post->ID);
 	$image_id = zem_rp_extract_post_image($related_post->ID, $size);
 	if ($image_id !== '-1') {
 		$img = wp_get_attachment_image($image_id, $size);

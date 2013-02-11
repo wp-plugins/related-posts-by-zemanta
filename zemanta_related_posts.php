@@ -481,3 +481,7 @@ function zem_rp_get_related_posts() {
 
 	return "\n" . $output . "\n";
 }
+
+function zemanta_related_posts() {
+	echo zem_rp_get_related_posts();
+}
