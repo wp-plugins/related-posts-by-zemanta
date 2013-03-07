@@ -182,6 +182,7 @@ function zem_rp_install() {
 		'version' => ZEM_RP_VERSION,
 		'first_version' => ZEM_RP_VERSION,
 		'new_user' => true,
+		'blog_tg' => rand(0, 1),
 		'show_install_tooltip' => true,
 		'remote_recommendations' => false,
 		'name' => '',
@@ -235,6 +236,20 @@ function zem_rp_install() {
 	zem_rp_related_posts_db_table_install();
 
 	zem_rp_process_latest_post_thumbnails();
+}
+
+function zem_rp_migrate_1_2() {
+	$zem_rp_meta = get_option('zem_rp_meta');
+	$zem_rp_options = get_option('zem_rp_options');
+
+	$zem_rp_meta['version'] = '1.3';
+
+	if (!isset($wp_rp_meta['blog_tg'])) {
+		$wp_rp_meta['blog_tg'] = rand(0, 1);
+	}
+
+	update_option('zem_rp_options', $zem_rp_options);
+	update_option('zem_rp_meta', $zem_rp_meta);
 }
 
 function zem_rp_migrate_1_1() {

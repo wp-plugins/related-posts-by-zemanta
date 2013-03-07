@@ -4,7 +4,7 @@ Tags: zemanta,related,posts,post,related posts,plugin,related content
 License: GPLv2
 Requires at least: 3.3
 Tested up to: 3.5
-Stable tag: 1.2
+Stable tag: 1.3
 
 Zemanta recommends your content to new audiences both on your blog and across our network of high-quality sites.
 
@@ -52,6 +52,11 @@ We adopted the principle of having three "release channels". You can try the mos
 3. Zemanta Related Posts responsive theme on a Galaxy Nexus and iPhone 4s.
 
 == Changelog ==
+
+= 1.3 =
+* Improved editorial control
+* Changed plugin content filter priority from 101 to 10
+* Bugfixes
 
 = 1.2 =
 * Mobile themes settings

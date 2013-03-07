@@ -1,14 +1,14 @@
 <?php
 /*
 Plugin Name: Related Posts by Zemanta
-Version: 1.2
+Version: 1.3
 Plugin URI: http://wordpress.org/extend/plugins/zemanta-related-posts/
 Description: Quickly increase your readers' engagement with your posts by adding Related Posts in the footer of your content.
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 */
 
-define('ZEM_RP_VERSION', '1.2');
+define('ZEM_RP_VERSION', '1.3');
 
 include_once(dirname(__FILE__) . '/config.php');
 include_once(dirname(__FILE__) . '/lib/stemmer.php');
@@ -58,7 +58,7 @@ function zem_rp_add_related_posts_hook($content) {
 
 	return $content;
 }
-add_filter('the_content', 'zem_rp_add_related_posts_hook', 101);
+add_filter('the_content', 'zem_rp_add_related_posts_hook', 10);
 
 global $zem_rp_is_phone;
 function zem_rp_is_phone() {
@@ -168,7 +168,7 @@ function zem_rp_fetch_posts_and_title() {
 	);
 }
 
-function zem_rp_get_next_post(&$related_posts, &$selected_related_posts, &$inserted_urls, $default_post_type) {
+function zem_rp_get_next_post(&$related_posts, &$selected_related_posts, &$inserted_urls, &$special_urls, $default_post_type) {
 	$post = false;
 
 	while (!($post && $post->ID) && !(empty($related_posts) && empty($selected_related_posts))) {
@@ -180,7 +180,7 @@ function zem_rp_get_next_post(&$related_posts, &$selected_related_posts, &$inser
 		}
 
 		if (!$post || !$post->ID) {
-			$post = array_shift($related_posts);
+			while (!empty($related_posts) && (!($post = array_shift($related_posts)) || isset($special_urls[get_permalink($post->ID)])));
 		}
 		if ($post && $post->ID) {
 			$post_url = property_exists($post, 'post_url') ? $post->post_url : get_permalink($post->ID);
@@ -209,12 +209,19 @@ function zem_rp_generate_related_posts_list_items($related_posts, $selected_rela
 	$limit = $options['max_related_posts'];
 
 	$inserted_urls = array(); // Used to prevent duplicates
+	$special_urls = array();
+
+	foreach ($selected_related_posts as $post) {
+		if (property_exists($post, 'post_url') && $post->post_url) {
+			$special_urls[$post->post_url] = true;
+		}
+	}
 
 	$default_post_type = empty($selected_related_posts) ? 'none' : 'empty';
 
 	$image_size = ($platform_options['theme_name'] == 'pinterest.css') ? 'full' : 'thumbnail';
 	for ($i = 0; $i < $limit; $i++) {
-		$related_post = zem_rp_get_next_post($related_posts, $selected_related_posts, $inserted_urls, $default_post_type);
+		$related_post = zem_rp_get_next_post($related_posts, $selected_related_posts, $inserted_urls, $special_urls, $default_post_type);
 		if (!$related_post) {
 			break;
 		}
@@ -339,7 +346,7 @@ function zem_rp_head_resources() {
 	}
 
 	if ($statistics_enabled) {
-		$tags = $wpdb->get_col("SELECT label FROM " . $wpdb->prefix . "zem_rp_tags WHERE post_id=$post->ID ORDER BY weight desc;", 0);
+		$tags = $wpdb->get_col("SELECT DISTINCT(label) FROM " . $wpdb->prefix . "zem_rp_tags WHERE post_id=$post->ID ORDER BY weight desc;", 0);
 		if (!empty($tags)) {
 			$post_tags = '[' . implode(', ', array_map(create_function('$v', 'return "\'" . urlencode(substr($v, strpos($v, \'_\') + 1)) . "\'";'), $tags)) . ']';
 		} else {
@@ -357,6 +364,7 @@ function zem_rp_head_resources() {
 			"\twindow._zem_rp_wp_ajax_url = '" . admin_url('admin-ajax.php') . "';\n" .
 			"\twindow._zem_rp_plugin_version = '" . ZEM_RP_VERSION . "';\n" .
 			"\twindow._zem_rp_num_rel_posts = '" . $options['max_related_posts'] . "';\n" .
+			"\twindow._zem_rp_remote_recommendations = " . ($remote_recommendations ? 'true' : 'false') . ";\n" .
 			(current_user_can('edit_posts') ?
 				"\twindow._zem_rp_admin_ajax_url = '" . admin_url('admin-ajax.php') . "';\n" .
 				"\twindow._zem_rp_plugin_static_base_url = '" . esc_js(plugins_url('static/' , __FILE__)) . "';\n"
@@ -380,7 +388,7 @@ function zem_rp_head_resources() {
 		$output .= '<style type="text/css">' . "\n" . $platform_options['theme_custom_css'] . "</style>\n";
 	}
 
-	if (current_user_can('edit_posts') && $remote_recommendations) {
+	if (current_user_can('edit_posts')) {
 		wp_enqueue_style('zem_rp_edit_related_posts_css', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . 'zem-css/edit_related_posts.css');
 		wp_enqueue_script('zem_rp_edit_related_posts_js', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . 'js/edit_related_posts.js', array('jquery'));
 	}
@@ -396,11 +404,7 @@ function zem_rp_head_resources() {
 	echo $output;
 }
 
-function zem_rp_get_selected_posts($remote_recommendations) {
-	if (!$remote_recommendations) {
-		return array();
-	}
-
+function zem_rp_get_selected_posts() {
 	global $post;
 
 	$selected_related_posts = get_post_meta($post->ID, '_zem_rp_selected_related_posts');
@@ -439,7 +443,7 @@ function zem_rp_get_related_posts() {
 	$related_posts = $posts_and_title['posts'];
 	$title = $posts_and_title['title'];
 
-	$selected_related_posts = zem_rp_get_selected_posts($remote_recommendations);
+	$selected_related_posts = zem_rp_get_selected_posts();
 
 	$related_posts_content = "";
 
@@ -448,7 +452,7 @@ function zem_rp_get_related_posts() {
 	}
 
 	$posts_footer = '<div class="zem_rp_footer">' .
-			((current_user_can('edit_posts') && $remote_recommendations)
+			(current_user_can('edit_posts')
 				? '<a class="zem_rp_edit" id="zem_rp_edit_related_posts" href="#">Edit Related Posts</a>'
 				: '<a class="zem_rp_backlink" target="_blank" rel="nofollow" href="http://www.zemanta.com/?related-posts">Zemanta</a>'
 			) .
@@ -476,7 +480,7 @@ function zem_rp_get_related_posts() {
 					$related_posts_content .
 					$posts_footer .
 				'</div>' .
-				($remote_recommendations ? '<script type="text/javascript">window._zem_rp_callback_widget_exists && window._zem_rp_callback_widget_exists();</script>' : '') .
+				($remote_recommendations ? '<script type="text/javascript">window._zem_rp_callback_widget_exists ? window._zem_rp_callback_widget_exists() : false;</script>' : '') .
 			'</div>';
 
 	return "\n" . $output . "\n";

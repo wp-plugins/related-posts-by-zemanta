@@ -230,7 +230,7 @@ function zem_rp_register_blog_and_login() {
 			$latest_post_url = get_permalink($latest_post->ID) . '#zem_rp_first';
 		}
 
-		wp_redirect(ZEM_RP_ZEMANTA_DASHBOARD_URL . '?blog_id=' . $meta['blog_id'] .
+		wp_redirect(ZEM_RP_ZEMANTA_DASHBOARD_URL . 'connect/?blog_id=' . $meta['blog_id'] .
 			'&auth_key=' . $meta['auth_key'] . '&rp_admin=' . urlencode(get_admin_url()) . '&rp_post=' . urlencode($latest_post_url)
 			, 302);
 		exit;
@@ -483,7 +483,7 @@ jQuery(function($) {
 				</div>
 			</div>
 
-			<div id="zem_rp_dashboard"><a href="<?php echo ZEM_RP_ZEMANTA_DASHBOARD_URL; ?>" target="_blank">Open dashboard</a></div>
+			<div id="zem_rp_dashboard"><a href="<?php echo ZEM_RP_ZEMANTA_DASHBOARD_URL . 'open/?blog_id=' . $meta['blog_id']; ?>" target="_blank">Open dashboard</a></div>
 
 			<div>
 				<h2><?php _e("Settings",'zemanta_related_posts');?></h2>
