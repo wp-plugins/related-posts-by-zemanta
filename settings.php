@@ -60,6 +60,16 @@ function zem_rp_print_tooltip($content) {
 }
 
 /**
+* Add settings link to installed plugins list
+**/
+function zem_rp_add_link_to_settings($links) {
+	return array_merge( array(
+		'<a href="' . admin_url('admin.php?page=zemanta-related-posts') . '">' . __('Settings', 'zemanta_related_posts') . '</a>',
+	), $links);
+}
+add_filter('plugin_action_links_' . ZEM_RP_PLUGIN_FILE, 'zem_rp_add_link_to_settings', 10, 2);
+
+/**
 * Place menu icons at admin head
 **/
 add_action('admin_head', 'zem_rp_admin_head');
@@ -380,8 +390,24 @@ function zem_rp_settings_page() {
 	<?php if(!$meta['zemanta_username']): ?>
 
 	<div id="zem_rp_login_div">
-		<p>We are almost ready. All you need to do is connect to our powerful servers. </p>
-		<a id="zem_rp_login" href="<?php echo get_admin_url(null, 'admin-ajax.php') . '?action=zem_rp_register_blog_and_login'; ?>" target="_blank">Connect</a>
+		<div id="zem-rp-message" class="zem-rp-connect">
+			<div id="zem-rp-dismiss">
+				<a id="zem-rp-close-button"></a>
+			</div>
+			<div id="zem-rp-wrap-container">
+				<div id="zem-rp-connect-wrap">
+					<a id="zem_rp_login" href="<?php echo get_admin_url(null, 'admin-ajax.php') . '?action=zem_rp_register_blog_and_login'; ?>" target="_blank">Connect</a>
+				</div>
+				<div id="zem-rp-text-container">
+					<h4>Related Posts by Zemanta are almost ready,</h4>
+					<h4>now all you need to do is connect to our service.</h4>
+				</div>
+			</div>
+			<div id="zem-rp-bottom-container">
+				<p>You'll get Settings, Themes, Thumbnails, Reader Exchange and Promoted Content.  These features are provided by <a target="_blank" href="http://www.zemanta.com"><b>Zemanta</b></a> as a service.</p>
+			</div>
+		</div>
+		<img src="<?php echo plugins_url("static/img/connectimg.jpg", __FILE__); ?>" />
 	</div>
 
 	<script type="text/javascript">
