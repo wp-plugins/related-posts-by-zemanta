@@ -141,5 +141,5 @@ form.zem_rp_message_form a.dismiss {float: right;}
 #zem-rp-message #zem-rp-wrap-container #zem-rp-connect-wrap #zem-rp-login:hover {background:-webkit-gradient(linear,left top,left bottom,color-stop(0.05,#f57b1e),color-stop(1,#f79124));background:-moz-linear-gradient(center top,#f57b1e 5%,#f79124 100%);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f57b1e',endColorstr='#f79124');background-color:#f57b1e;text-decoration:none;}
 #zem-rp-message #zem-rp-wrap-container #zem-rp-text-container {display: inline-block;margin: 18px 0 12px 20px;color: #000;}
 #zem-rp-message #zem-rp-wrap-container #zem-rp-text-container h4 {margin: 0; font-size: 20px;}
-#zem-rp-message #zem-rp-bottom-container {min-width: 1000px; padding: 0 20px;}
-#zem-rp-message #zem-rp-bottom-container p {color:#000; font-weight:100; font-size: 13px; margin: 5px 0;}
+#zem-rp-message #zem-rp-bottom-container {min-width: 1000px; padding: 5px 20px;}
+#zem-rp-message #zem-rp-bottom-container p {color:#000; font-weight:100; font-size: 13px; margin: 0;}

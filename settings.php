@@ -404,7 +404,8 @@ function zem_rp_settings_page() {
 				</div>
 			</div>
 			<div id="zem-rp-bottom-container">
-				<p>You'll get Settings, Themes, Thumbnails, Reader Exchange and Promoted Content.  These features are provided by <a target="_blank" href="http://www.zemanta.com"><b>Zemanta</b></a> as a service.</p>
+				<p>By turning on Related Posts you agree to <a href="http://www.zemanta.com/blog/related-posts-terms-of-service/" target="_blank">terms of service.</a></p>
+				<p>You'll get Advanced Settings, Themes, Thumbnails and Analytics Dashboard. These features are provided by <a target="_blank" href="http://www.zemanta.com">Zemanta</a> as a service.</p>
 			</div>
 		</div>
 		<img src="<?php echo plugins_url("static/img/connectimg.jpg", __FILE__); ?>" />
