@@ -404,7 +404,7 @@ function zem_rp_settings_page() {
 				</div>
 			</div>
 			<div id="zem-rp-bottom-container">
-				<p>By turning on Related Posts you agree to <a href="http://www.zemanta.com/blog/related-posts-terms-of-service/" target="_blank">terms of service.</a></p>
+				<p>By turning on Related Posts you agree to <a href="http://www.zemanta.com/rp-tos" target="_blank">terms of service.</a></p>
 				<p>You'll get Advanced Settings, Themes, Thumbnails and Analytics Dashboard. These features are provided by <a target="_blank" href="http://www.zemanta.com">Zemanta</a> as a service.</p>
 			</div>
 		</div>
