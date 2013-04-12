@@ -264,10 +264,20 @@ function zem_rp_generate_related_posts_list_items($related_posts, $selected_rela
 
 		if ($platform_options["display_excerpt"]){
 			$excerpt_max_length = $platform_options["excerpt_max_length"];
-			if($related_post->post_excerpt){
-				$output .= '<br /><small>' . (mb_substr(strip_shortcodes(strip_tags($related_post->post_excerpt)), 0, $excerpt_max_length)) . '...</small>';
-			} else {
-				$output .= '<br /><small>' . (mb_substr(strip_shortcodes(strip_tags($related_post->post_content)), 0, $excerpt_max_length)) . '...</small>';
+			$excerpt = '';
+
+			if ($related_post->post_excerpt){
+				$excerpt = strip_shortcodes(strip_tags($related_post->post_excerpt));
+			}
+			if (!$excerpt) {
+				$excerpt = strip_shortcodes(strip_tags($related_post->post_content));
+			}
+
+			if ($excerpt) {
+				if (strlen($excerpt) > $excerpt_max_length) {
+					$excerpt = mb_substr($excerpt, 0, $excerpt_max_length - 3) . '...';
+				}
+				$output .= '<br /><small>' . $excerpt . '</small>';
 			}
 		}
 		$output .=  '</li>';
