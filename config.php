@@ -204,6 +204,7 @@ function zem_rp_install() {
 		'default_thumbnail_path'		=> false,
 		'thumbnail_use_custom' => false,
 		'thumbnail_custom_field' => '',
+		'display_zemanta_linky' => false,
 
 		'mobile' => array(
 			'display_comment_count'			=> false,
@@ -237,14 +238,26 @@ function zem_rp_install() {
 	zem_rp_process_latest_post_thumbnails();
 }
 
+function zem_rp_migrate_1_3() {
+	$zem_rp_meta = get_option('zem_rp_meta');
+	$zem_rp_options = get_option('zem_rp_options');
+
+	$zem_rp_meta['version'] = '1.3.1';
+
+	$zem_rp_options['display_zemanta_linky'] = false;
+
+	update_option('zem_rp_options', $zem_rp_options);
+	update_option('zem_rp_meta', $zem_rp_meta);
+}
+
 function zem_rp_migrate_1_2() {
 	$zem_rp_meta = get_option('zem_rp_meta');
 	$zem_rp_options = get_option('zem_rp_options');
 
 	$zem_rp_meta['version'] = '1.3';
 
-	if (!isset($wp_rp_meta['blog_tg'])) {
-		$wp_rp_meta['blog_tg'] = rand(0, 1);
+	if (!isset($zem_rp_meta['blog_tg'])) {
+		$zem_rp_meta['blog_tg'] = rand(0, 1);
 	}
 
 	update_option('zem_rp_options', $zem_rp_options);

@@ -230,6 +230,7 @@ function zem_rp_settings_page() {
 
 			'thumbnail_use_custom' => isset($postdata['zem_rp_thumbnail_use_custom']),
 			'thumbnail_custom_field' => isset($postdata['zem_rp_thumbnail_custom_field']) ? trim($postdata['zem_rp_thumbnail_custom_field']) : '',
+			'display_zemanta_linky' => isset($postdata['zem_rp_display_zemanta_linky']),
 
 			'mobile' => array(
 				'display_thumbnail' => isset($postdata['zem_rp_mobile_display_thumbnail']),
@@ -600,6 +601,11 @@ jQuery(function($) {
 									<?php _e("Auto Insert Related Posts",'zemanta_related_posts');?>
 								</label>
 								(or add <pre style="display: inline">&lt;?php zemanta_related_posts()?&gt;</pre> to your single post template)
+								<br />
+								<label>
+									<input name="zem_rp_display_zemanta_linky" type="checkbox" id="zem_rp_display_zemanta_linky" value="yes" <?php checked($options['display_zemanta_linky']); ?> />
+									<?php _e("Support us (show our logo)",'wp_related_posts');?>
+								</label>
 								<br />
 								<label>
 									<input name="zem_rp_on_rss" type="checkbox" id="zem_rp_on_rss" value="yes"<?php checked($options['on_rss']); ?>>
