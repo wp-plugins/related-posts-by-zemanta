@@ -1,65 +1,6 @@
 <?php
 
 /**
-* Tooltips
-**/
-
-function zem_rp_display_tooltips() {
-	$meta = zem_rp_get_meta();
-
-	if ($meta['show_install_tooltip']) {
-		$meta['show_install_tooltip'] = false;
-		zem_rp_update_meta($meta);
-
-		add_action('admin_enqueue_scripts', 'zem_rp_load_install_tooltip');
-	}
-}
-
-function zem_rp_load_install_tooltip() {
-    wp_enqueue_style('wp-pointer');
-    wp_enqueue_script('wp-pointer');
-    add_action('admin_print_footer_scripts', 'zem_rp_print_install_tooltip');
-}
-
-function zem_rp_print_install_tooltip() {
-	$content = "<h3>Thanks for installing Related Posts by Zemanta!</h3><p>To experience the full power of Zemanta, go to settings and connect to Zemanta Dashboard!</p>";
-	zem_rp_print_tooltip($content);
-}
-
-function zem_rp_print_tooltip($content) {
-	?>
-	<script type="text/javascript">
-		jQuery(function ($) {
-			var body = $(document.body),
-				collapse = $('#collapse-menu'),
-				target = $("#toplevel_page_zemanta-related-posts"),
-				collapse_handler = function (e) {
-					body.pointer('reposition');
-				},
-				options = {
-					content: "<?php echo $content; ?>",
-					position: {
-						edge: 'left',
-						align: 'center',
-						of: target
-					},
-					open: function () {
-						collapse.bind('click', collapse_handler);
-					},
-					close: function() {
-						collapse.unbind('click', collapse_handler);
-					}
-				};
-
-			if (target.length) {
-				body.pointer(options).pointer('open');
-			}
-		});
-	</script>
-	<?php
-}
-
-/**
 * Add settings link to installed plugins list
 **/
 function zem_rp_add_link_to_settings($links) {
@@ -91,6 +32,7 @@ function zem_rp_admin_head() {
 <?php
 }
 
+
 /**
 * Settings
 **/
@@ -114,8 +56,6 @@ function zem_rp_settings_admin_menu() {
 
 	add_action('admin_print_styles-' . $page, 'zem_rp_settings_styles');
 	add_action('admin_print_scripts-' . $page, 'zem_rp_settings_scripts');
-
-	zem_rp_display_tooltips();
 }
 
 function zem_rp_settings_scripts() {
@@ -202,7 +142,7 @@ function zem_rp_is_zemanta_connected() {
 	$req_options = array(
 		'timeout' => 30
 	);
-	$response = wp_remote_get(ZEM_RP_ZEMANTA_DASHBOARD_URL . '/get_username?blog_id=' . $meta['blog_id'] .
+	$response = wp_remote_get(ZEM_RP_ZEMANTA_DASHBOARD_URL . 'get_username?blog_id=' . $meta['blog_id'] .
 			'&auth_key=' . $meta['auth_key'], $req_options);
 
 	if (wp_remote_retrieve_response_code($response) == 200) {
@@ -290,6 +230,7 @@ function zem_rp_settings_page() {
 
 			'thumbnail_use_custom' => isset($postdata['zem_rp_thumbnail_use_custom']),
 			'thumbnail_custom_field' => isset($postdata['zem_rp_thumbnail_custom_field']) ? trim($postdata['zem_rp_thumbnail_custom_field']) : '',
+			'display_zemanta_linky' => isset($postdata['zem_rp_display_zemanta_linky']),
 
 			'mobile' => array(
 				'display_thumbnail' => isset($postdata['zem_rp_mobile_display_thumbnail']),
@@ -369,6 +310,7 @@ function zem_rp_settings_page() {
 		<?php if ($meta['blog_id']):?>
 		<input type="hidden" id="zem_rp_blog_id" value="<?php esc_attr_e($meta['blog_id']); ?>" />
 		<input type="hidden" id="zem_rp_auth_key" value="<?php esc_attr_e($meta['auth_key']); ?>" />
+		<input type="hidden" id="zem_rp_zemanta_username" value="<?php esc_attr_e($meta['zemanta_username']); ?>" />
 		<?php endif; ?>
 
 		<?php if($meta['show_traffic_exchange']): ?>
@@ -396,7 +338,7 @@ function zem_rp_settings_page() {
 			</div>
 			<div id="zem-rp-wrap-container">
 				<div id="zem-rp-connect-wrap">
-					<a id="zem_rp_login" href="<?php echo get_admin_url(null, 'admin-ajax.php') . '?action=zem_rp_register_blog_and_login'; ?>" target="_blank">Connect</a>
+					<a id="zem-rp-login" href="<?php echo get_admin_url(null, 'admin-ajax.php') . '?action=zem_rp_register_blog_and_login'; ?>" target="_blank">Connect</a>
 				</div>
 				<div id="zem-rp-text-container">
 					<h4>Related Posts by Zemanta are almost ready,</h4>
@@ -404,32 +346,12 @@ function zem_rp_settings_page() {
 				</div>
 			</div>
 			<div id="zem-rp-bottom-container">
-				<p>By turning on Related Posts you agree to <a href="http://www.zemanta.com/blog/related-posts-terms-of-service/" target="_blank">terms of service.</a></p>
+				<p>By turning on Related Posts you agree to <a href="http://www.zemanta.com/rp-tos" target="_blank">terms of service.</a></p>
 				<p>You'll get Advanced Settings, Themes, Thumbnails and Analytics Dashboard. These features are provided by <a target="_blank" href="http://www.zemanta.com">Zemanta</a> as a service.</p>
 			</div>
 		</div>
 		<img src="<?php echo plugins_url("static/img/connectimg.jpg", __FILE__); ?>" />
 	</div>
-
-	<script type="text/javascript">
-jQuery(function($) {
-	var interval;
-
-	var check_if_connected = function() {
-		jQuery.post(ajaxurl, { action: 'zem_rp_is_zemanta_connected'}, function(data) {
-			if(data === 'yes') {
-				clearInterval(interval);
-				window.location.reload();
-			}
-		});
-	}
-
-	$('#zem_rp_login').click(function() {
-		interval = setInterval(check_if_connected, 4000);	// 4 seconds
-		setTimeout(check_if_connected, 300);
-	});
-});
-	</script>
 
 	<?php else: ?>
 
@@ -679,6 +601,11 @@ jQuery(function($) {
 									<?php _e("Auto Insert Related Posts",'zemanta_related_posts');?>
 								</label>
 								(or add <pre style="display: inline">&lt;?php zemanta_related_posts()?&gt;</pre> to your single post template)
+								<br />
+								<label>
+									<input name="zem_rp_display_zemanta_linky" type="checkbox" id="zem_rp_display_zemanta_linky" value="yes" <?php checked($options['display_zemanta_linky']); ?> />
+									<?php _e("Support us (show our logo)",'wp_related_posts');?>
+								</label>
 								<br />
 								<label>
 									<input name="zem_rp_on_rss" type="checkbox" id="zem_rp_on_rss" value="yes"<?php checked($options['on_rss']); ?>>
