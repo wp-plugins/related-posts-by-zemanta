@@ -75,23 +75,32 @@ function zem_rp_register_blog() {
 		'timeout' => 30
 	);
 
-	$response = wp_remote_get(ZEM_RP_CTR_DASHBOARD_URL . 'register/?blog_url=' . get_bloginfo('wpurl') . '&type=zem' .
-			($meta['new_user'] ? '&new' : ''), $req_options);
+	$register_path = 'register/?blog_url=' . urlencode(get_bloginfo('wpurl')) . '&type=zem' . ($meta['new_user'] ? '&new' : '');
+
+	$response = wp_remote_get(ZEM_RP_CTR_DASHBOARD_URL . $register_path, $req_options);
 
 	if (wp_remote_retrieve_response_code($response) == 200) {
 		$body = wp_remote_retrieve_body($response);
 		if ($body) {
 			$doc = json_decode($body);
-
-			if ($doc && $doc->status === 'ok') {
-				$meta['blog_id'] = $doc->data->blog_id;
-				$meta['auth_key'] = $doc->data->auth_key;
-				$meta['new_user'] = false;
-				zem_rp_update_meta($meta);
-
-				return true;
+			if ($doc) {
+				if ($doc->status === 'ok') {
+					$meta['blog_id'] = $doc->data->blog_id;
+					$meta['auth_key'] = $doc->data->auth_key;
+					$meta['new_user'] = false;
+					zem_rp_update_meta($meta);
+					return true;
+				} else {
+					return "Invalid status: " . $doc->status . ' Request: ' . $register_path;
+				}
+			} else {
+				return "Empty doc. Request: " . $register_path;
 			}
+		} else {
+			return "Empty response body. Request: " . $register_path;
 		}
+	} else {
+		return "Response code: " . wp_remote_retrieve_response_code($response) . " Request: " . $register_path;
 	}
 
 	return false;
@@ -170,7 +179,8 @@ function zem_rp_is_zemanta_connected() {
 add_action('wp_ajax_zem_rp_is_zemanta_connected', 'zem_rp_is_zemanta_connected');
 
 function zem_rp_register_blog_and_login() {
-	if(zem_rp_register_blog()) {
+	$register_blog_response = zem_rp_register_blog();
+	if ($register_blog_response === true) {
 		$meta = zem_rp_get_meta();
 
 		$latest_post_url = '';
@@ -185,7 +195,8 @@ function zem_rp_register_blog_and_login() {
 			, 302);
 		exit;
 	} else {
-		die('something went wrong, please reload this site');
+		wp_remote_get('http://content.zemanta.com/static/stats.gif?error=register_blog&data=' . urlencode($register_blog_response));
+		die('Something went wrong, please reload this site. Error: ' . $register_blog_response);
 	}
 }
 
@@ -329,7 +340,13 @@ function zem_rp_settings_page() {
 
 		<?php zem_rp_print_notifications(); ?>
 
-	<?php if(!$meta['zemanta_username']): ?>
+	<?php
+	if(!$meta['zemanta_username']):
+	/*
+		Plugin assumes each site can be connected only to one user and doesn't display connect button to already connected users.
+		To resolve the issue of multiple users per site we'll have to display connect button to everyone.
+	*/
+	?>
 
 	<div id="zem_rp_login_div">
 		<div id="zem-rp-message" class="zem-rp-connect">
