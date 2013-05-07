@@ -1,65 +1,6 @@
 <?php
 
 /**
-* Tooltips
-**/
-
-function zem_rp_display_tooltips() {
-	$meta = zem_rp_get_meta();
-
-	if ($meta['show_install_tooltip']) {
-		$meta['show_install_tooltip'] = false;
-		zem_rp_update_meta($meta);
-
-		add_action('admin_enqueue_scripts', 'zem_rp_load_install_tooltip');
-	}
-}
-
-function zem_rp_load_install_tooltip() {
-    wp_enqueue_style('wp-pointer');
-    wp_enqueue_script('wp-pointer');
-    add_action('admin_print_footer_scripts', 'zem_rp_print_install_tooltip');
-}
-
-function zem_rp_print_install_tooltip() {
-	$content = "<h3>Thanks for installing Related Posts by Zemanta!</h3><p>To experience the full power of Zemanta, go to settings and connect to Zemanta Dashboard!</p>";
-	zem_rp_print_tooltip($content);
-}
-
-function zem_rp_print_tooltip($content) {
-	?>
-	<script type="text/javascript">
-		jQuery(function ($) {
-			var body = $(document.body),
-				collapse = $('#collapse-menu'),
-				target = $("#toplevel_page_zemanta-related-posts"),
-				collapse_handler = function (e) {
-					body.pointer('reposition');
-				},
-				options = {
-					content: "<?php echo $content; ?>",
-					position: {
-						edge: 'left',
-						align: 'center',
-						of: target
-					},
-					open: function () {
-						collapse.bind('click', collapse_handler);
-					},
-					close: function() {
-						collapse.unbind('click', collapse_handler);
-					}
-				};
-
-			if (target.length) {
-				body.pointer(options).pointer('open');
-			}
-		});
-	</script>
-	<?php
-}
-
-/**
 * Add settings link to installed plugins list
 **/
 function zem_rp_add_link_to_settings($links) {
@@ -91,6 +32,7 @@ function zem_rp_admin_head() {
 <?php
 }
 
+
 /**
 * Settings
 **/
@@ -114,8 +56,6 @@ function zem_rp_settings_admin_menu() {
 
 	add_action('admin_print_styles-' . $page, 'zem_rp_settings_styles');
 	add_action('admin_print_scripts-' . $page, 'zem_rp_settings_scripts');
-
-	zem_rp_display_tooltips();
 }
 
 function zem_rp_settings_scripts() {
@@ -135,54 +75,40 @@ function zem_rp_register_blog() {
 		'timeout' => 30
 	);
 
-	$response = wp_remote_get(ZEM_RP_CTR_DASHBOARD_URL . 'register/?blog_url=' . get_bloginfo('wpurl') . '&type=zem' .
-			($meta['new_user'] ? '&new' : ''), $req_options);
+	$register_path = 'register/?blog_url=' . urlencode(get_bloginfo('wpurl')) . '&type=zem' . ($meta['new_user'] ? '&new' : '');
+
+	$response = wp_remote_get(ZEM_RP_CTR_DASHBOARD_URL . $register_path, $req_options);
 
 	if (wp_remote_retrieve_response_code($response) == 200) {
 		$body = wp_remote_retrieve_body($response);
 		if ($body) {
 			$doc = json_decode($body);
-
-			if ($doc && $doc->status === 'ok') {
-				$meta['blog_id'] = $doc->data->blog_id;
-				$meta['auth_key'] = $doc->data->auth_key;
-				$meta['new_user'] = false;
-				zem_rp_update_meta($meta);
-
-				return true;
+			if ($doc) {
+				if ($doc->status === 'ok') {
+					$meta['blog_id'] = $doc->data->blog_id;
+					$meta['auth_key'] = $doc->data->auth_key;
+					$meta['new_user'] = false;
+					zem_rp_update_meta($meta);
+					return true;
+				} else {
+					return "Invalid status: " . $doc->status . ' Request: ' . $register_path;
+				}
+			} else {
+				return "Empty doc. Request: " . $register_path;
 			}
+		} else {
+			return "Empty response body. Request: " . $register_path;
 		}
+	} else {
+		return "Response code: " . wp_remote_retrieve_response_code($response) . " Request: " . $register_path;
 	}
 
 	return false;
 }
 
-function zem_rp_ajax_blogger_network_submit_callback() {
-	$postdata = stripslashes_deep($_POST);
+function zem_rp_ajax_dismiss_notification_callback() {
+	check_ajax_referer('zem_rp_ajax_nonce');
 
-	$meta = zem_rp_get_meta();
-
-	$meta['show_blogger_network_form'] = false;
-	if(isset($postdata['join'])) {
-		$meta['remote_recommendations'] = true;
-	}
-	else {
-		$blog_id = $meta['blog_id'];
-		$auth_key = $meta['auth_key'];
-		$req_options = array(
-			'timeout' => 5
-		);
-		$url = ZEM_RP_CTR_DASHBOARD_URL . "notifications/dismiss/?blog_id=$blog_id&auth_key=$auth_key&msg_id=blogger_network_form";
-		$response = wp_remote_get($url, $req_options);
-	}
-
-	zem_rp_update_meta($meta);
-
-	die('ok');
-}
-add_action('wp_ajax_blogger_network_submit', 'zem_rp_ajax_blogger_network_submit_callback');
-
-function zem_rp_ajax_dismiss_notification_callback() {	
 	if(isset($_REQUEST['id'])) {
 		zem_rp_dismiss_notification((int)$_REQUEST['id']);
 	}
@@ -195,6 +121,8 @@ function zem_rp_ajax_dismiss_notification_callback() {
 add_action('wp_ajax_rp_dismiss_notification', 'zem_rp_ajax_dismiss_notification_callback');
 
 function zem_rp_is_zemanta_connected() {
+	check_ajax_referer('zem_rp_ajax_nonce');
+
 	$meta = zem_rp_get_meta();
 
 	if(!$meta['blog_id']) die('no');
@@ -202,7 +130,7 @@ function zem_rp_is_zemanta_connected() {
 	$req_options = array(
 		'timeout' => 30
 	);
-	$response = wp_remote_get(ZEM_RP_ZEMANTA_DASHBOARD_URL . '/get_username?blog_id=' . $meta['blog_id'] .
+	$response = wp_remote_get(ZEM_RP_ZEMANTA_DASHBOARD_URL . 'get_username?blog_id=' . $meta['blog_id'] .
 			'&auth_key=' . $meta['auth_key'], $req_options);
 
 	if (wp_remote_retrieve_response_code($response) == 200) {
@@ -230,7 +158,8 @@ function zem_rp_is_zemanta_connected() {
 add_action('wp_ajax_zem_rp_is_zemanta_connected', 'zem_rp_is_zemanta_connected');
 
 function zem_rp_register_blog_and_login() {
-	if(zem_rp_register_blog()) {
+	$register_blog_response = zem_rp_register_blog();
+	if ($register_blog_response === true) {
 		$meta = zem_rp_get_meta();
 
 		$latest_post_url = '';
@@ -245,13 +174,16 @@ function zem_rp_register_blog_and_login() {
 			, 302);
 		exit;
 	} else {
-		die('something went wrong, please reload this site');
+		wp_remote_get('http://content.zemanta.com/static/stats.gif?error=register_blog&data=' . urlencode($register_blog_response));
+		die('Something went wrong, please reload this site. Error: ' . $register_blog_response);
 	}
 }
 
 add_action('wp_ajax_zem_rp_register_blog_and_login', 'zem_rp_register_blog_and_login');
 
 function zem_rp_ajax_hide_show_statistics() {
+	check_ajax_referer('zem_rp_ajax_nonce');
+
 	$meta = zem_rp_get_meta();
 	$postdata = stripslashes_deep($_POST);
 
@@ -270,6 +202,10 @@ function zem_rp_ajax_hide_show_statistics() {
 add_action('wp_ajax_rp_show_hide_statistics', 'zem_rp_ajax_hide_show_statistics');
 
 function zem_rp_settings_page() {
+	if (!current_user_can('delete_users')) {
+		die('Sorry, you don\'t have permissions to access this page.');
+	}
+
 	$options = zem_rp_get_options();
 	$meta = zem_rp_get_meta();
 
@@ -278,8 +214,11 @@ function zem_rp_settings_page() {
 	// load notifications every time user goes to settings page
 	zem_rp_load_remote_notifications();
 
-	if(sizeof($_POST))
-	{
+	if(sizeof($_POST)) {
+		if (!isset($_POST['_zem_rp_nonce']) || !wp_verify_nonce($_POST['_zem_rp_nonce'], 'zem_rp_settings') ) {
+			die('Sorry, your nonce did not verify.');
+		}
+
 		$old_options = $options;
 		$new_options = array(
 			'on_single_post' => isset($postdata['zem_rp_on_single_post']),
@@ -290,6 +229,7 @@ function zem_rp_settings_page() {
 
 			'thumbnail_use_custom' => isset($postdata['zem_rp_thumbnail_use_custom']),
 			'thumbnail_custom_field' => isset($postdata['zem_rp_thumbnail_custom_field']) ? trim($postdata['zem_rp_thumbnail_custom_field']) : '',
+			'display_zemanta_linky' => isset($postdata['zem_rp_display_zemanta_linky']),
 
 			'mobile' => array(
 				'display_thumbnail' => isset($postdata['zem_rp_mobile_display_thumbnail']),
@@ -361,6 +301,8 @@ function zem_rp_settings_page() {
 ?>
 
 	<div class="wrap" id="zem_rp_wrap">
+		<input type="hidden" id="zem_rp_ajax_nonce" value="<?php echo wp_create_nonce("zem_rp_ajax_nonce"); ?>" />
+
 		<input type="hidden" id="zem_rp_json_url" value="<?php esc_attr_e(ZEM_RP_ZEMANTA_CONTENT_BASE_URL . ZEM_RP_STATIC_JSON_PATH); ?>" />
 		<input type="hidden" id="zem_rp_version" value="<?php esc_attr_e(ZEM_RP_VERSION); ?>" />
 		<input type="hidden" id="zem_rp_dashboard_url" value="<?php esc_attr_e(ZEM_RP_CTR_DASHBOARD_URL); ?>" />
@@ -369,6 +311,7 @@ function zem_rp_settings_page() {
 		<?php if ($meta['blog_id']):?>
 		<input type="hidden" id="zem_rp_blog_id" value="<?php esc_attr_e($meta['blog_id']); ?>" />
 		<input type="hidden" id="zem_rp_auth_key" value="<?php esc_attr_e($meta['auth_key']); ?>" />
+		<input type="hidden" id="zem_rp_zemanta_username" value="<?php esc_attr_e($meta['zemanta_username']); ?>" />
 		<?php endif; ?>
 
 		<?php if($meta['show_traffic_exchange']): ?>
@@ -387,7 +330,13 @@ function zem_rp_settings_page() {
 
 		<?php zem_rp_print_notifications(); ?>
 
-	<?php if(!$meta['zemanta_username']): ?>
+	<?php
+	if(!$meta['zemanta_username']):
+	/*
+		Plugin assumes each site can be connected only to one user and doesn't display connect button to already connected users.
+		To resolve the issue of multiple users per site we'll have to display connect button to everyone.
+	*/
+	?>
 
 	<div id="zem_rp_login_div">
 		<div id="zem-rp-message" class="zem-rp-connect">
@@ -396,7 +345,7 @@ function zem_rp_settings_page() {
 			</div>
 			<div id="zem-rp-wrap-container">
 				<div id="zem-rp-connect-wrap">
-					<a id="zem_rp_login" href="<?php echo get_admin_url(null, 'admin-ajax.php') . '?action=zem_rp_register_blog_and_login'; ?>" target="_blank">Connect</a>
+					<a id="zem-rp-login" href="<?php echo get_admin_url(null, 'admin-ajax.php') . '?action=zem_rp_register_blog_and_login'; ?>" target="_blank">Connect</a>
 				</div>
 				<div id="zem-rp-text-container">
 					<h4>Related Posts by Zemanta are almost ready,</h4>
@@ -404,100 +353,18 @@ function zem_rp_settings_page() {
 				</div>
 			</div>
 			<div id="zem-rp-bottom-container">
-				<p>By turning on Related Posts you agree to <a href="http://www.zemanta.com/blog/related-posts-terms-of-service/" target="_blank">terms of service.</a></p>
+				<p>By turning on Related Posts you agree to <a href="http://www.zemanta.com/rp-tos" target="_blank">terms of service.</a></p>
 				<p>You'll get Advanced Settings, Themes, Thumbnails and Analytics Dashboard. These features are provided by <a target="_blank" href="http://www.zemanta.com">Zemanta</a> as a service.</p>
 			</div>
 		</div>
 		<img src="<?php echo plugins_url("static/img/connectimg.jpg", __FILE__); ?>" />
 	</div>
 
-	<script type="text/javascript">
-jQuery(function($) {
-	var interval;
-
-	var check_if_connected = function() {
-		jQuery.post(ajaxurl, { action: 'zem_rp_is_zemanta_connected'}, function(data) {
-			if(data === 'yes') {
-				clearInterval(interval);
-				window.location.reload();
-			}
-		});
-	}
-
-	$('#zem_rp_login').click(function() {
-		interval = setInterval(check_if_connected, 4000);	// 4 seconds
-		setTimeout(check_if_connected, 300);
-	});
-});
-	</script>
-
 	<?php else: ?>
 
-		<?php if ($meta['show_blogger_network_form'] and $meta['blog_id']): ?>
-		<form action="https://docs.google.com/a/zemanta.com/spreadsheet/formResponse?formkey=dDEyTlhraEd0dnRwVVFMX19LRW8wbWc6MQ&amp;ifq" method="POST" class="zem_rp_message_form" id="zem_rp_blogger_network_form" target="zem_rp_blogger_network_hidden_iframe">
-			<input type="hidden" name="pageNumber" value="0" />
-			<input type="hidden" name="backupCache" />
-			<input type="hidden" name="entry.2.single" value="<?php echo get_bloginfo('wpurl'); ?>" />
-			<input type="hidden" name="entry.3.single" value="<?php echo $meta['blog_id']; ?>" />
-			<a href="#" class="dismiss"><img width="12" src="<?php echo plugins_url("static/img/close.png", __FILE__); ?>" /></a>
-			<h2>Blogger networks</h2>
-			<p>Easily link out to similar bloggers to exchange traffic with them. One click out, one click in.</p>
-			<table class="form-table"><tbody>
-				<tr valign="top">
-					<th scope="row"><label for="zem_rp_blogger_network_kind">I want to exchange traffic with</label></th>
-					<td width="1%">
-						<select name="entry.0.group" id="zem_rp_blogger_network_kind">
-							<option value="Automotive" />Automotive bloggers</option>
-							<option value="Beauty &amp; Style" />Beauty &amp; Style bloggers</option>
-							<option value="Business" />Business bloggers</option>
-							<option value="Consumer Tech" />Consumer Tech bloggers</option>
-							<option value="Enterprise Tech" />Enterprise Tech bloggers</option>
-							<option value="Entertainment" />Entertainment bloggers</option>
-							<option value="Family &amp; Parenting" />Family &amp; Parenting bloggers</option>
-							<option value="Food &amp; Drink" />Food &amp; Drink bloggers</option>
-							<option value="Graphic Arts" />Graphic Arts bloggers</option>
-							<option value="Healthy Living" />Healthy Living bloggers</option>
-							<option value="Home &amp; Shelter" />Home &amp; Shelter bloggers</option>
-							<option value="Lifestyle &amp; Hobby" />Lifestyle &amp; Hobby bloggers</option>
-							<option value="Men's Lifestyle" />Men's Lifestyle bloggers</option>
-							<option value="Personal Finance" />Personal Finance bloggers</option>
-							<option value="Women's Lifestyle" />Women's Lifestyle bloggers</option>
-						</select>
-					</td>
-					<td rowspan="2" valign="middle"><div id="zem_rp_blogger_network_thankyou" class="thankyou"><img src="<?php echo plugins_url("static/img/check.png", __FILE__); ?>" width="30" height="22" />Thanks for showing interest.</div></td>
-				</tr>
-				<tr valign="top">
-					<th scope="row"><label for="zem_rp_blogger_network_email">My email is:</label></th>
-					<td><input type="email" name="entry.1.single" value="" id="zem_rp_blogger_network_email" required="required" /></td>
-				</tr>
-				<tr valign="top">
-					<th scope="row"></th>
-					<td><input type="submit" name="submit" value="Submit" class="submit" id="zem_rp_blogger_network_submit" /></td>
-			</tbody></table>
-			<script type="text/javascript">
-jQuery(function($) {
-	var submit = $('#zem_rp_blogger_network_submit');
-	$('#zem_rp_blogger_network_form')
-		.submit(function(event) {
-			submit.addClass('disabled');
-			setTimeout(function() { submit.attr('disabled', true); }, 0);
-			$('#zem_rp_blogger_network_hidden_iframe').load(function() {
-				submit.attr('disabled', false).removeClass('disabled');
-				$('#zem_rp_blogger_network_thankyou').fadeIn('slow');
-				$.post(ajaxurl, {action: 'blogger_network_submit', 'join': true});
-			});
-		})
-		.find('a.dismiss').click(function () {
-			$.post(ajaxurl, {action: 'blogger_network_submit'});
-			$('#zem_rp_blogger_network_form').slideUp();
-		});
-});
-			</script>
-		</form>
-		<iframe id="zem_rp_blogger_network_hidden_iframe" name="zem_rp_blogger_network_hidden_iframe" style="display: none"></iframe>
-		<?php endif; ?>
-
 		<form method="post" enctype="multipart/form-data" action="" id="zem_rp_settings_form">
+			<?php wp_nonce_field('zem_rp_settings', '_zem_rp_nonce') ?>
+
 			<div id="zem_rp_statistics_holder">
 				<div id="zem_rp_statistics_collapsible" block="statistics" class="collapsible<?php if(!$meta['show_statistics']) { echo " collapsed"; } ?>">
 					<a href="#" class="collapse-handle">Collapse</a>
@@ -679,6 +546,11 @@ jQuery(function($) {
 									<?php _e("Auto Insert Related Posts",'zemanta_related_posts');?>
 								</label>
 								(or add <pre style="display: inline">&lt;?php zemanta_related_posts()?&gt;</pre> to your single post template)
+								<br />
+								<label>
+									<input name="zem_rp_display_zemanta_linky" type="checkbox" id="zem_rp_display_zemanta_linky" value="yes" <?php checked($options['display_zemanta_linky']); ?> />
+									<?php _e("Support us (show our logo)",'wp_related_posts');?>
+								</label>
 								<br />
 								<label>
 									<input name="zem_rp_on_rss" type="checkbox" id="zem_rp_on_rss" value="yes"<?php checked($options['on_rss']); ?>>

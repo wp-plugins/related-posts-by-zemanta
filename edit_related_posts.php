@@ -1,6 +1,8 @@
 <?php
 
 function zem_rp_update_related_posts_callback() {
+	die('error'); // Not supported any more.
+
 	if (!current_user_can('edit_posts')) {
 		die('error');
 	}
