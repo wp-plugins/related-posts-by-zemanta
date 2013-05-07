@@ -4,7 +4,7 @@ Tags: zemanta,related,posts,post,related posts,plugin,related content
 License: GPLv2
 Requires at least: 3.3
 Tested up to: 3.5
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 
 Zemanta recommends your content to new audiences both on your blog and across our network of high-quality sites.
 
@@ -51,7 +51,15 @@ We adopted the principle of having three "release channels". You can try the mos
 2. Zemanta Related Posts reporting real time statistics for mobile and desktop devices.
 3. Zemanta Related Posts responsive theme on a Galaxy Nexus and iPhone 4s.
 
+== Upgrade Notice ==
+
+= 1.3.2 =
+Fix for security vulnerability. Upgrade immediately.
+
 == Changelog ==
+
+= 1.3.2 =
+* Fix for Cross-Site Request Forgery vulnerability. Credits for finding and reporting the vulnerability go to Charlie Eriksen via Secunia SVCRP.
 
 = 1.3.1 =
 * Fixed a post excerpt bug

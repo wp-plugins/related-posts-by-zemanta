@@ -57,13 +57,16 @@ function zem_rp_get_options() {
 	}
 
 	$zem_rp_meta = get_option('zem_rp_meta', false);
-	if(!$zem_rp_meta || $zem_rp_meta['version'] !== ZEM_RP_VERSION) {
+	$zem_rp_options = get_option('zem_rp_options', false);
+
+	if(!$zem_rp_meta || !$zem_rp_options || $zem_rp_meta['version'] !== ZEM_RP_VERSION) {
 		zem_rp_upgrade();
 		$zem_rp_meta = get_option('zem_rp_meta');
+		$zem_rp_options = get_option('zem_rp_options');
 	}
-	$zem_rp_meta = new ArrayObject($zem_rp_meta);
 
-	$zem_rp_options = new ArrayObject(get_option('zem_rp_options'));
+	$zem_rp_meta = new ArrayObject($zem_rp_meta);
+	$zem_rp_options = new ArrayObject($zem_rp_options);
 
 	if ($zem_rp_meta['blog_id']) {
 		define('ZEM_RP_ZEMANTA_CONTENT_BASE_URL', 'http://content.zemanta.com/static/');
@@ -186,7 +189,6 @@ function zem_rp_install() {
 		'remote_recommendations' => false,
 		'name' => '',
 		'email' => '',
-		'show_blogger_network_form' => false,
 		'remote_notifications' => array(),
 		'show_statistics' => false,
 		'show_traffic_exchange' => false,
