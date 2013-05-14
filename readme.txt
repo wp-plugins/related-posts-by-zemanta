@@ -4,7 +4,7 @@ Tags: zemanta,related,posts,post,related posts,plugin,related content
 License: GPLv2
 Requires at least: 3.3
 Tested up to: 3.5
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 
 Zemanta recommends your content to new audiences both on your blog and across our network of high-quality sites.
 
@@ -57,6 +57,9 @@ We adopted the principle of having three "release channels". You can try the mos
 Fix for security vulnerability. Upgrade immediately.
 
 == Changelog ==
+
+= 1.3.3 =
+* Due to popular demand, "Edit related posts" is back in action. Send us more feedback to support@zemanta.com. Thanks!
 
 = 1.3.2 =
 * Fix for Cross-Site Request Forgery vulnerability. Credits for finding and reporting the vulnerability go to Charlie Eriksen via Secunia SVCRP.

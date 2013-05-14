@@ -59,11 +59,11 @@ function zem_rp_settings_admin_menu() {
 }
 
 function zem_rp_settings_scripts() {
-	wp_enqueue_script('zem_rp_themes_script', plugins_url('static/js/themes.js', __FILE__), array('jquery'));
-	wp_enqueue_script("zem_rp_dashboard_script", plugins_url('static/js/dashboard.js', __FILE__), array('jquery') );
+	wp_enqueue_script('zem_rp_themes_script', plugins_url('static/js/themes.js', __FILE__), array('jquery'), ZEM_RP_VERSION);
+	wp_enqueue_script("zem_rp_dashboard_script", plugins_url('static/js/dashboard.js', __FILE__), array('jquery'), ZEM_RP_VERSION);
 }
 function zem_rp_settings_styles() {
-	wp_enqueue_style("zem_rp_dashaboard_style", plugins_url("static/css/dashboard.css", __FILE__));
+	wp_enqueue_style("zem_rp_dashaboard_style", plugins_url("static/css/dashboard.css", __FILE__), array(), ZEM_RP_VERSION);
 }
 
 function zem_rp_register_blog() {
@@ -100,7 +100,7 @@ function zem_rp_register_blog() {
 			return "Empty response body. Request: " . $register_path;
 		}
 	} else {
-		return "Response code: " . wp_remote_retrieve_response_code($response) . " Request: " . $register_path;
+		return $response->get_error_message() . "<br />Request: " . ZEM_RP_CTR_DASHBOARD_URL . $register_path;
 	}
 
 	return false;
