@@ -1,6 +1,7 @@
 <?php
 
 function zem_rp_update_related_posts_callback() {
+	check_ajax_referer('zem_rp_ajax_nonce');
 	if (!current_user_can('edit_posts')) {
 		die('error');
 	}

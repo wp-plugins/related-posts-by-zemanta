@@ -38,7 +38,7 @@ function zem_rp_print_notifications() {
 
 	foreach($messages as $id => $text) {
 		echo '<div class="zem_rp_notification">
-			<a href="' . admin_url('admin-ajax.php?action=rp_dismiss_notification&id=' . $id) . '" class="close">x</a>
+			<a href="' . admin_url('admin-ajax.php?action=rp_dismiss_notification&id=' . $id . '&_wpnonce=' . wp_create_nonce("zem_rp_ajax_nonce")) . '" class="close">x</a>
 			<p>' . $text . '</p>
 		</div>';
 	}

@@ -1,14 +1,14 @@
 <?php
 /*
 Plugin Name: Related Posts by Zemanta
-Version: 1.3
+Version: 1.3.3
 Plugin URI: http://wordpress.org/extend/plugins/zemanta-related-posts/
 Description: Quickly increase your readers' engagement with your posts by adding Related Posts in the footer of your content. Click on <a href="admin.php?page=zemanta-related-posts">Zemanta tab</a> to configure your settings.
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 */
 
-define('ZEM_RP_VERSION', '1.3');
+define('ZEM_RP_VERSION', '1.3.1');
 
 define('ZEM_RP_PLUGIN_FILE', plugin_basename(__FILE__));
 
@@ -264,10 +264,20 @@ function zem_rp_generate_related_posts_list_items($related_posts, $selected_rela
 
 		if ($platform_options["display_excerpt"]){
 			$excerpt_max_length = $platform_options["excerpt_max_length"];
-			if($related_post->post_excerpt){
-				$output .= '<br /><small>' . (mb_substr(strip_shortcodes(strip_tags($related_post->post_excerpt)), 0, $excerpt_max_length)) . '...</small>';
-			} else {
-				$output .= '<br /><small>' . (mb_substr(strip_shortcodes(strip_tags($related_post->post_content)), 0, $excerpt_max_length)) . '...</small>';
+			$excerpt = '';
+
+			if ($related_post->post_excerpt){
+				$excerpt = strip_shortcodes(strip_tags($related_post->post_excerpt));
+			}
+			if (!$excerpt) {
+				$excerpt = strip_shortcodes(strip_tags($related_post->post_content));
+			}
+
+			if ($excerpt) {
+				if (strlen($excerpt) > $excerpt_max_length) {
+					$excerpt = mb_substr($excerpt, 0, $excerpt_max_length - 3) . '...';
+				}
+				$output .= '<br /><small>' . $excerpt . '</small>';
 			}
 		}
 		$output .=  '</li>';
@@ -297,6 +307,7 @@ function zem_rp_should_exclude() {
 }
 
 function zem_rp_ajax_blogger_network_blacklist_callback() {
+	check_ajax_referer('zem_rp_ajax_nonce');
 	if (!current_user_can('delete_users')) {
 		die();
 	}
@@ -369,7 +380,8 @@ function zem_rp_head_resources() {
 			"\twindow._zem_rp_remote_recommendations = " . ($remote_recommendations ? 'true' : 'false') . ";\n" .
 			(current_user_can('edit_posts') ?
 				"\twindow._zem_rp_admin_ajax_url = '" . admin_url('admin-ajax.php') . "';\n" .
-				"\twindow._zem_rp_plugin_static_base_url = '" . esc_js(plugins_url('static/' , __FILE__)) . "';\n"
+				"\twindow._zem_rp_plugin_static_base_url = '" . esc_js(plugins_url('static/' , __FILE__)) . "';\n" .
+				"\twindow._zem_rp_ajax_nonce = '" . wp_create_nonce("zem_rp_ajax_nonce") . "';\n"
 			: '') .
 			"</script>\n";
 	}
@@ -391,16 +403,16 @@ function zem_rp_head_resources() {
 	}
 
 	if (current_user_can('edit_posts')) {
-		wp_enqueue_style('zem_rp_edit_related_posts_css', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . 'zem-css/edit_related_posts.css');
-		wp_enqueue_script('zem_rp_edit_related_posts_js', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . 'js/edit_related_posts.js', array('jquery'));
+		wp_enqueue_style('zem_rp_edit_related_posts_css', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . 'zem-css/edit_related_posts.css', array(), WP_RP_VERSION);
+		wp_enqueue_script('zem_rp_edit_related_posts_js', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . 'js/edit_related_posts.js', array('jquery'), WP_RP_VERSION);
 	}
 
 	if($platform_options['theme_name'] === 'm-stream.css') {
-		wp_enqueue_script('zem_rp_infiniterecs', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . ZEM_RP_STATIC_INFINITE_RECS_JS_FILE, array('jquery'));
+		wp_enqueue_script('zem_rp_infiniterecs', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . ZEM_RP_STATIC_INFINITE_RECS_JS_FILE, array('jquery'), WP_RP_VERSION);
 	}
 
 	if($platform_options['theme_name'] === 'pinterest.css') {
-		wp_enqueue_script('zem_rp_pinterest', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . ZEM_RP_STATIC_PINTEREST_JS_FILE, array('jquery'));
+		wp_enqueue_script('zem_rp_pinterest', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . ZEM_RP_STATIC_PINTEREST_JS_FILE, array('jquery'), WP_RP_VERSION);
 	}
 
 	echo $output;
@@ -453,12 +465,13 @@ function zem_rp_get_related_posts() {
 		return;
 	}
 
-	$posts_footer = '<div class="zem_rp_footer">' .
-			(current_user_can('edit_posts')
-				? '<a class="zem_rp_edit" id="zem_rp_edit_related_posts" href="#">Edit Related Posts</a>'
-				: '<a class="zem_rp_backlink" target="_blank" rel="nofollow" href="http://www.zemanta.com/?related-posts">Zemanta</a>'
-			) .
-		'</div>';
+	$posts_footer = '';
+	if (current_user_can('edit_posts')) {
+		$posts_footer .= '<div class="zem_rp_footer"><a class="zem_rp_edit" href="#" id="zem_rp_edit_related_posts">Edit Related Posts</a></div>';
+	}
+	if ($options['display_zemanta_linky']) {
+		$posts_footer .= '<div class="zem_rp_footer"><a class="zem_rp_backlink" target="_blank" href="http://www.zemanta.com/?related-posts">Zemanta</a></div>';
+	}
 
 	$css_classes = 'related_post zem_rp';
 	$css_classes_wrap = str_replace(array('.css', '-'), array('', '_'), esc_attr('zem_rp_th_' . $platform_options['theme_name']));
