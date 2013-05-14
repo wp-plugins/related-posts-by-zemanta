@@ -403,16 +403,16 @@ function zem_rp_head_resources() {
 	}
 
 	if (current_user_can('edit_posts')) {
-		wp_enqueue_style('zem_rp_edit_related_posts_css', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . 'zem-css/edit_related_posts.css', array(), WP_RP_VERSION);
-		wp_enqueue_script('zem_rp_edit_related_posts_js', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . 'js/edit_related_posts.js', array('jquery'), WP_RP_VERSION);
+		wp_enqueue_style('zem_rp_edit_related_posts_css', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . 'zem-css/edit_related_posts.css', array(), ZEM_RP_VERSION);
+		wp_enqueue_script('zem_rp_edit_related_posts_js', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . 'js/edit_related_posts.js', array('jquery'), ZEM_RP_VERSION);
 	}
 
 	if($platform_options['theme_name'] === 'm-stream.css') {
-		wp_enqueue_script('zem_rp_infiniterecs', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . ZEM_RP_STATIC_INFINITE_RECS_JS_FILE, array('jquery'), WP_RP_VERSION);
+		wp_enqueue_script('zem_rp_infiniterecs', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . ZEM_RP_STATIC_INFINITE_RECS_JS_FILE, array('jquery'), ZEM_RP_VERSION);
 	}
 
 	if($platform_options['theme_name'] === 'pinterest.css') {
-		wp_enqueue_script('zem_rp_pinterest', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . ZEM_RP_STATIC_PINTEREST_JS_FILE, array('jquery'), WP_RP_VERSION);
+		wp_enqueue_script('zem_rp_pinterest', ZEM_RP_ZEMANTA_CONTENT_BASE_URL . ZEM_RP_STATIC_PINTEREST_JS_FILE, array('jquery'), ZEM_RP_VERSION);
 	}
 
 	echo $output;
