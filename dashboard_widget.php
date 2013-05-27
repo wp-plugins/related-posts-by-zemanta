@@ -26,6 +26,7 @@ function zem_rp_display_dashboard_widget() {
 	<input type="hidden" id="zem_rp_dashboard_url" value="<?php esc_attr_e(ZEM_RP_CTR_DASHBOARD_URL); ?>" />
 	<input type="hidden" id="zem_rp_static_base_url" value="<?php esc_attr_e(ZEM_RP_ZEMANTA_CONTENT_BASE_URL); ?>" />
 	<input type="hidden" id="zem_rp_blog_id" value="<?php esc_attr_e($meta['blog_id']); ?>" />
+	<input type="hidden" id="zem_rp_zemanta_username" value="<?php esc_attr_e($meta['zemanta_username']); ?>" />
 	<input type="hidden" id="zem_rp_auth_key" value="<?php esc_attr_e($meta['auth_key']); ?>" />
 	<?php if($meta['show_traffic_exchange']): ?>
 	<input type="hidden" id="zem_rp_show_traffic_exchange_statistics" value="1" />

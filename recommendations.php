@@ -200,7 +200,7 @@ function zem_rp_fetch_related_posts_v2($limit = 10, $exclude_ids = array()) {
 					WHERE label IN (" . implode(', ', array_fill(0, count($exclude_categories_labels), "%s")) . ")
 				)") . "
 		GROUP BY target.post_id
-		ORDER BY score desc
+		ORDER BY score desc, target.post_id desc
 		LIMIT %d;",
 		array_merge(
 			array($total_number_of_posts, $total_number_of_posts),
