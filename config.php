@@ -240,6 +240,13 @@ function zem_rp_install() {
 	zem_rp_process_latest_post_thumbnails();
 }
 
+function zem_rp_migrate_1_4() {
+	$zem_rp_meta = get_option('zem_rp_meta');
+	$zem_rp_meta['version'] = '1.5';
+	$zem_rp_meta['new_user'] = false;
+	update_option('zem_rp_meta', $zem_rp_meta);
+}
+
 function zem_rp_migrate_1_3_1() {
 	$zem_rp_meta = get_option('zem_rp_meta');
 	$zem_rp_meta['version'] = '1.4';

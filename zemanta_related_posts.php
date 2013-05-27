@@ -1,14 +1,14 @@
 <?php
 /*
 Plugin Name: Related Posts by Zemanta
-Version: 1.4
+Version: 1.5
 Plugin URI: http://wordpress.org/extend/plugins/zemanta-related-posts/
 Description: Quickly increase your readers' engagement with your posts by adding Related Posts in the footer of your content. Click on <a href="admin.php?page=zemanta-related-posts">Zemanta tab</a> to configure your settings.
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 */
 
-define('ZEM_RP_VERSION', '1.4');
+define('ZEM_RP_VERSION', '1.5');
 
 define('ZEM_RP_PLUGIN_FILE', plugin_basename(__FILE__));
 
@@ -99,6 +99,8 @@ function zem_rp_ajax_load_articles_callback() {
 	$from = (isset($getdata['from']) && is_numeric($getdata['from'])) ? intval($getdata['from']) : 0;
 	$count = (isset($getdata['count']) && is_numeric($getdata['count'])) ? intval($getdata['count']) : 50;
 
+	$search = isset($getdata['search']) && $getdata['search'] ? $getdata['search'] : false;
+
 	$image_size = isset($getdata['size']) ? $getdata['size'] : 'thumbnail';
 	if(!($image_size == 'thumbnail' || $image_size == 'full')) {
 		die('error');
@@ -106,11 +108,19 @@ function zem_rp_ajax_load_articles_callback() {
 
 	$limit = $count + $from;
 
-	$related_posts = array();
-
-	zem_rp_append_posts($related_posts, 'zem_rp_fetch_related_posts_v2', $limit);
-	zem_rp_append_posts($related_posts, 'zem_rp_fetch_related_posts', $limit);
-	zem_rp_append_posts($related_posts, 'zem_rp_fetch_random_posts', $limit);
+	if ($search) {
+		$the_query = new WP_Query(array(
+			's' => $search,
+			'post_type' => 'post',
+			'post_status'=>'publish',
+			'post_count' => $limit));
+		$related_posts = $the_query->get_posts();
+	} else {
+		$related_posts = array();
+		zem_rp_append_posts($related_posts, 'zem_rp_fetch_related_posts_v2', $limit);
+		zem_rp_append_posts($related_posts, 'zem_rp_fetch_related_posts', $limit);
+		zem_rp_append_posts($related_posts, 'zem_rp_fetch_random_posts', $limit);
+	}
 
 	if(function_exists('qtrans_postsFilter')) {
 		$related_posts = qtrans_postsFilter($related_posts);
@@ -381,7 +391,9 @@ function zem_rp_head_resources() {
 			(current_user_can('edit_posts') ?
 				"\twindow._zem_rp_admin_ajax_url = '" . admin_url('admin-ajax.php') . "';\n" .
 				"\twindow._zem_rp_plugin_static_base_url = '" . esc_js(plugins_url('static/' , __FILE__)) . "';\n" .
-				"\twindow._zem_rp_ajax_nonce = '" . wp_create_nonce("zem_rp_ajax_nonce") . "';\n"
+				"\twindow._zem_rp_ajax_nonce = '" . wp_create_nonce("zem_rp_ajax_nonce") . "';\n" .
+
+				"\twindow._zem_rp_erp_search = true;\n"
 			: '') .
 			"</script>\n";
 	}

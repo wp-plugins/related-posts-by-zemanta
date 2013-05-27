@@ -4,7 +4,7 @@ Tags: zemanta,related,posts,post,related posts,plugin,related content
 License: GPLv2
 Requires at least: 3.3
 Tested up to: 3.6
-Stable tag: 1.4
+Stable tag: 1.5
 
 Zemanta recommends your content to new audiences both on your blog and across our network of high-quality sites.
 
@@ -71,6 +71,10 @@ New thumbnailer might break backwards compatibility for blogs with custom thumbn
 Fix for security vulnerability. Upgrade immediately.
 
 == Changelog ==
+
+= 1.5 =
+* Edit Related Posts gets a visual upgrade, search functionality and a dose of awesome
+* bugfixes
 
 = 1.4 =
 * Improved thumbnailer
