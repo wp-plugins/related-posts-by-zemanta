@@ -12,6 +12,8 @@ ul.related_post li a {
 ul.related_post li img {
 }");
 
+define('ZEM_RP_THUMBNAILS_NAME', 'zem_rp_thumbnail');
+define('ZEM_RP_THUMBNAILS_PROP_NAME', 'zem_rp_thumbnail_prop');
 define('ZEM_RP_THUMBNAILS_WIDTH', 150);
 define('ZEM_RP_THUMBNAILS_HEIGHT', 150);
 define('ZEM_RP_THUMBNAILS_DEFAULTS_COUNT', 31);
@@ -20,8 +22,7 @@ define('ZEM_RP_THUMBNAILS_DEFAULTS_COUNT', 31);
 define('ZEM_RP_STATIC_THEMES_PATH', 'zem-css/');
 define('ZEM_RP_STATIC_JSON_PATH', 'json/');
 
-define("ZEM_RP_CTR_DASHBOARD_URL", "http://d.related-posts.com/");
-define("ZEM_RP_CTR_REPORT_URL", "http://t.related-posts.com/pageview/?");
+define("ZEM_RP_CTR_DASHBOARD_URL", "http://d.zemanta.com/");
 define("ZEM_RP_STATIC_CTR_PAGEVIEW_FILE", "js/pageview.js");
 
 define("ZEM_RP_STATIC_RECOMMENDATIONS_JS_FILE", "js/recommendations.js");
@@ -45,6 +46,8 @@ define("ZEM_RP_RECOMMENDATIONS_CATEGORIES_SCORE", 5);
 define("ZEM_RP_RECOMMENDATIONS_NUM_PREGENERATED_POSTS", 50);
 
 define("ZEM_RP_THUMBNAILS_NUM_PREGENERATED_POSTS", 50);
+
+define("ZEM_RP_MAX_LABEL_LENGTH", 32);
 
 global $zem_rp_options, $zem_rp_meta;
 $zem_rp_options = false;
@@ -162,7 +165,7 @@ function zem_rp_related_posts_db_table_install() {
 	$sql_tags = "CREATE TABLE $tags_table_name (
 	  post_id mediumint(9),
 	  post_date datetime NOT NULL,
-	  label VARCHAR(32) NOT NULL,
+	  label VARCHAR(" . ZEM_RP_MAX_LABEL_LENGTH . ") NOT NULL,
 	  weight float,
 	  INDEX post_id (post_id),
 	  INDEX label (label)
@@ -238,6 +241,18 @@ function zem_rp_install() {
 	zem_rp_related_posts_db_table_install();
 
 	zem_rp_process_latest_post_thumbnails();
+}
+
+function zem_rp_migrate_1_5() {
+	global $wpdb;
+
+	$zem_rp_meta = get_option('zem_rp_meta');
+	$zem_rp_meta['version'] = '1.6';
+	$zem_rp_meta['new_user'] = false;
+
+	$wpdb->query("DELETE FROM $wpdb->postmeta WHERE meta_key IN ('_zem_rp_extracted_image_url', '_zem_rp_extracted_image_url_full')");
+
+	update_option('zem_rp_meta', $zem_rp_meta);
 }
 
 function zem_rp_migrate_1_4() {
