@@ -12,6 +12,8 @@ ul.related_post li a {
 ul.related_post li img {
 }");
 
+define('ZEM_RP_THUMBNAILS_NAME', 'zem_rp_thumbnail');
+define('ZEM_RP_THUMBNAILS_PROP_NAME', 'zem_rp_thumbnail_prop');
 define('ZEM_RP_THUMBNAILS_WIDTH', 150);
 define('ZEM_RP_THUMBNAILS_HEIGHT', 150);
 define('ZEM_RP_THUMBNAILS_DEFAULTS_COUNT', 31);
@@ -20,8 +22,7 @@ define('ZEM_RP_THUMBNAILS_DEFAULTS_COUNT', 31);
 define('ZEM_RP_STATIC_THEMES_PATH', 'zem-css/');
 define('ZEM_RP_STATIC_JSON_PATH', 'json/');
 
-define("ZEM_RP_CTR_DASHBOARD_URL", "http://d.related-posts.com/");
-define("ZEM_RP_CTR_REPORT_URL", "http://t.related-posts.com/pageview/?");
+define("ZEM_RP_CTR_DASHBOARD_URL", "http://d.zemanta.com/");
 define("ZEM_RP_STATIC_CTR_PAGEVIEW_FILE", "js/pageview.js");
 
 define("ZEM_RP_STATIC_RECOMMENDATIONS_JS_FILE", "js/recommendations.js");
@@ -46,6 +47,8 @@ define("ZEM_RP_RECOMMENDATIONS_NUM_PREGENERATED_POSTS", 50);
 
 define("ZEM_RP_THUMBNAILS_NUM_PREGENERATED_POSTS", 50);
 
+define("ZEM_RP_MAX_LABEL_LENGTH", 32);
+
 global $zem_rp_options, $zem_rp_meta;
 $zem_rp_options = false;
 $zem_rp_meta = false;
@@ -57,13 +60,16 @@ function zem_rp_get_options() {
 	}
 
 	$zem_rp_meta = get_option('zem_rp_meta', false);
-	if(!$zem_rp_meta || $zem_rp_meta['version'] !== ZEM_RP_VERSION) {
+	$zem_rp_options = get_option('zem_rp_options', false);
+
+	if(!$zem_rp_meta || !$zem_rp_options || $zem_rp_meta['version'] !== ZEM_RP_VERSION) {
 		zem_rp_upgrade();
 		$zem_rp_meta = get_option('zem_rp_meta');
+		$zem_rp_options = get_option('zem_rp_options');
 	}
-	$zem_rp_meta = new ArrayObject($zem_rp_meta);
 
-	$zem_rp_options = new ArrayObject(get_option('zem_rp_options'));
+	$zem_rp_meta = new ArrayObject($zem_rp_meta);
+	$zem_rp_options = new ArrayObject($zem_rp_options);
 
 	if ($zem_rp_meta['blog_id']) {
 		define('ZEM_RP_ZEMANTA_CONTENT_BASE_URL', 'http://content.zemanta.com/static/');
@@ -159,7 +165,7 @@ function zem_rp_related_posts_db_table_install() {
 	$sql_tags = "CREATE TABLE $tags_table_name (
 	  post_id mediumint(9),
 	  post_date datetime NOT NULL,
-	  label VARCHAR(32) NOT NULL,
+	  label VARCHAR(" . ZEM_RP_MAX_LABEL_LENGTH . ") NOT NULL,
 	  weight float,
 	  INDEX post_id (post_id),
 	  INDEX label (label)
@@ -183,11 +189,9 @@ function zem_rp_install() {
 		'first_version' => ZEM_RP_VERSION,
 		'new_user' => true,
 		'blog_tg' => rand(0, 1),
-		'show_install_tooltip' => true,
 		'remote_recommendations' => false,
 		'name' => '',
 		'email' => '',
-		'show_blogger_network_form' => false,
 		'remote_notifications' => array(),
 		'show_statistics' => false,
 		'show_traffic_exchange' => false,
@@ -196,7 +200,7 @@ function zem_rp_install() {
 
 	$zem_rp_options = array(
 		'related_posts_title'			=> __('Related Posts', 'zemanta_related_posts'),
-		'max_related_posts'			=> 5,
+		'max_related_posts'			=> 6,
 		'exclude_categories'			=> '',
 		'on_single_post'			=> true,
 		'on_rss'				=> false,
@@ -205,6 +209,7 @@ function zem_rp_install() {
 		'default_thumbnail_path'		=> false,
 		'thumbnail_use_custom' => false,
 		'thumbnail_custom_field' => '',
+		'display_zemanta_linky' => false,
 
 		'mobile' => array(
 			'display_comment_count'			=> false,
@@ -222,7 +227,7 @@ function zem_rp_install() {
 			'display_thumbnail'			=> true,
 			'display_excerpt'			=> false,
 			'excerpt_max_length'			=> 200,
-			'theme_name' 				=> 'vertical-m.css',
+			'theme_name' 				=> 'vertical.css',
 			'theme_custom_css'			=> ZEM_RP_DEFAULT_CUSTOM_CSS,
 			'custom_theme_enabled' => false
 		),
@@ -238,14 +243,52 @@ function zem_rp_install() {
 	zem_rp_process_latest_post_thumbnails();
 }
 
+function zem_rp_migrate_1_5() {
+	global $wpdb;
+
+	$zem_rp_meta = get_option('zem_rp_meta');
+	$zem_rp_meta['version'] = '1.6';
+	$zem_rp_meta['new_user'] = false;
+
+	$wpdb->query("DELETE FROM $wpdb->postmeta WHERE meta_key IN ('_zem_rp_extracted_image_url', '_zem_rp_extracted_image_url_full')");
+
+	update_option('zem_rp_meta', $zem_rp_meta);
+}
+
+function zem_rp_migrate_1_4() {
+	$zem_rp_meta = get_option('zem_rp_meta');
+	$zem_rp_meta['version'] = '1.5';
+	$zem_rp_meta['new_user'] = false;
+	update_option('zem_rp_meta', $zem_rp_meta);
+}
+
+function zem_rp_migrate_1_3_1() {
+	$zem_rp_meta = get_option('zem_rp_meta');
+	$zem_rp_meta['version'] = '1.4';
+	$zem_rp_meta['new_user'] = false;
+	update_option('zem_rp_meta', $zem_rp_meta);
+}
+
+function zem_rp_migrate_1_3() {
+	$zem_rp_meta = get_option('zem_rp_meta');
+	$zem_rp_options = get_option('zem_rp_options');
+
+	$zem_rp_meta['version'] = '1.3.1';
+
+	$zem_rp_options['display_zemanta_linky'] = false;
+
+	update_option('zem_rp_options', $zem_rp_options);
+	update_option('zem_rp_meta', $zem_rp_meta);
+}
+
 function zem_rp_migrate_1_2() {
 	$zem_rp_meta = get_option('zem_rp_meta');
 	$zem_rp_options = get_option('zem_rp_options');
 
 	$zem_rp_meta['version'] = '1.3';
 
-	if (!isset($wp_rp_meta['blog_tg'])) {
-		$wp_rp_meta['blog_tg'] = rand(0, 1);
+	if (!isset($zem_rp_meta['blog_tg'])) {
+		$zem_rp_meta['blog_tg'] = rand(0, 1);
 	}
 
 	update_option('zem_rp_options', $zem_rp_options);

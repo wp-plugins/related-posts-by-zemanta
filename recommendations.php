@@ -128,6 +128,7 @@ function zem_rp_generate_tags($post) {
 
 		foreach ($tag_obj['labels'] as $label) {
 			$label = $tag_obj['prefix'] . strtolower($label);
+			$label = substr($label, 0, ZEM_RP_MAX_LABEL_LENGTH);
 
 			array_push($all_tags, $label);
 
@@ -200,7 +201,7 @@ function zem_rp_fetch_related_posts_v2($limit = 10, $exclude_ids = array()) {
 					WHERE label IN (" . implode(', ', array_fill(0, count($exclude_categories_labels), "%s")) . ")
 				)") . "
 		GROUP BY target.post_id
-		ORDER BY score desc
+		ORDER BY score desc, target.post_id desc
 		LIMIT %d;",
 		array_merge(
 			array($total_number_of_posts, $total_number_of_posts),
