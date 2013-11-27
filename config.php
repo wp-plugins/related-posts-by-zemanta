@@ -243,6 +243,16 @@ function zem_rp_install() {
 	zem_rp_process_latest_post_thumbnails();
 }
 
+function zem_rp_migrate_1_6() {
+	global $wpdb;
+
+	$zem_rp_meta = get_option('zem_rp_meta');
+	$zem_rp_meta['version'] = '1.7';
+	$zem_rp_meta['new_user'] = false;
+
+	update_option('zem_rp_meta', $zem_rp_meta);
+}
+
 function zem_rp_migrate_1_5() {
 	global $wpdb;
 

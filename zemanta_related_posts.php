@@ -1,14 +1,14 @@
 <?php
 /*
 Plugin Name: Related Posts by Zemanta
-Version: 1.6
+Version: 1.7
 Plugin URI: http://wordpress.org/extend/plugins/zemanta-related-posts/
 Description: Quickly increase your readers' engagement with your posts by adding Related Posts in the footer of your content. Click on <a href="admin.php?page=zemanta-related-posts">Zemanta tab</a> to configure your settings.
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 */
 
-define('ZEM_RP_VERSION', '1.6');
+define('ZEM_RP_VERSION', '1.7');
 
 define('ZEM_RP_PLUGIN_FILE', plugin_basename(__FILE__));
 
@@ -133,6 +133,9 @@ function zem_rp_ajax_load_articles_callback() {
 				'id' => $related_post->ID,
 				'url' => get_permalink($related_post->ID),
 				'title' => $related_post->post_title,
+				'excerpt' => $related_post->post_excerpt,
+				'date' => $related_post->post_date,
+				'comments' => $related_post->comment_count,
 				'img' => zem_rp_get_post_thumbnail_img($related_post, $image_size)
 			));
 	}
@@ -263,13 +266,13 @@ function zem_rp_generate_related_posts_list_items($related_posts, $selected_rela
 
 		if ($platform_options["display_publish_date"]){
 			$dateformat = get_option('date_format');
-			$output .= mysql2date($dateformat, $related_post->post_date) . " -- ";
+			$output .= '<small class="wp_rp_publish_date">' . mysql2date($dateformat, $related_post->post_date) . '</small>';
 		}
 
 		$output .= '<a href="' . $post_url . '" class="zem_rp_title">' . wptexturize($related_post->post_title) . '</a>';
 
 		if ($platform_options["display_comment_count"] && property_exists($related_post, 'comment_count')){
-			$output .=  " (" . $related_post->comment_count . ")";
+			$output .=  '<small class="wp_rp_comments_count"> (' . $related_post->comment_count . ')</small><br />';
 		}
 
 		if ($platform_options["display_excerpt"]){
@@ -287,7 +290,7 @@ function zem_rp_generate_related_posts_list_items($related_posts, $selected_rela
 				if (strlen($excerpt) > $excerpt_max_length) {
 					$excerpt = mb_substr($excerpt, 0, $excerpt_max_length - 3) . '...';
 				}
-				$output .= '<br /><small>' . $excerpt . '</small>';
+				$output .= '<small class="wp_rp_excerpt">' . $excerpt . '</small>';
 			}
 		}
 		$output .=  '</li>';
@@ -487,7 +490,7 @@ function zem_rp_get_related_posts() {
 	}
 	if ($options['display_zemanta_linky']) {
 		$posts_footer .= '<div class="zem_rp_footer" style="text-align: right;">' .
-				'<a class="zem_rp_backlink" style="color: #999; font-size: 11px; text-decoration: none;" target="_blank" href="http://www.zemanta.com/?related-posts">Zemanta</a>' .
+				'<a class="zem_rp_backlink" style="color: #999; font-size: 11px; text-decoration: none;" target="_blank" href="http://www.zemanta.com/?related-posts" rel="nofollow">Zemanta</a>' .
 			'</div>';
 	}
 
