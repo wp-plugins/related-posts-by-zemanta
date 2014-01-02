@@ -196,6 +196,7 @@ function zem_rp_install() {
 		'show_statistics' => false,
 		'show_traffic_exchange' => false,
 		'zemanta_username' => false,
+		'classic_user' => strpos(get_bloginfo('language'), 'en') === 0 // Enable only if "any" english is the default language
 	);
 
 	$zem_rp_options = array(
@@ -241,6 +242,27 @@ function zem_rp_install() {
 	zem_rp_related_posts_db_table_install();
 
 	zem_rp_process_latest_post_thumbnails();
+}
+
+function zem_is_classic() {
+	$meta = zem_rp_get_meta();
+	if (isset($meta['classic_user']) && $meta['classic_user']) {
+		return true;
+	}
+	return false;
+}
+
+function zem_rp_migrate_1_7() {
+	global $wpdb;
+
+	$zem_rp_meta = get_option('zem_rp_meta');
+	$zem_rp_meta['version'] = '1.8';
+	$zem_rp_meta['new_user'] = false;
+	if (strpos(get_bloginfo('language'), 'en') === 0) {
+		$zem_rp_meta['classic_user'] = true;
+	}
+
+	update_option('zem_rp_meta', $zem_rp_meta);
 }
 
 function zem_rp_migrate_1_6() {

@@ -22,10 +22,20 @@
 */
 
 /* ************************* */
+/*         Version 1.8       */
+/* ************************* */
+
+/* Meta options:
+
+	- Added Zemanta Editorial Assistant
+
+*/
+
+/* ************************* */
 /*         Version 1.7       */
 /* ************************* */
 
-/* Settings: 
+/* Settings:
 
 	- scroll_up_related_posts
 	- include_promotionail_link

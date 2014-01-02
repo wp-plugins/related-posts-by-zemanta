@@ -97,8 +97,8 @@ form.zem_rp_message_form a.dismiss {float: right;}
 #zem_rp_wrap .excluded-categories {width: 250px; height: 12em; overflow: auto; padding: 0 5px; border: 1px solid #dfdfdf;}
 
 /* collapsible CSS */
-#zem_rp_wrap .collapsible .collapse-handle {margin-top: 16px; margin-right: 16px; float: right; width: 30px; height: 20px; background: url('../img/up.jpg') 0% 0% no-repeat; text-indent: -9999px; overflow: hidden; outline: 0;}
-#zem_rp_wrap .collapsible.collapsed .collapse-handle {background-image: url('../img/down.jpg');}
+#zem_rp_wrap .collapsible .collapse-handle {margin-top: 16px; margin-right: 16px; float: right; width: 30px; height: 20px; background: url('../img/up.png') 0% 0% no-repeat; text-indent: -9999px; overflow: hidden; outline: 0;}
+#zem_rp_wrap .collapsible.collapsed .collapse-handle {background-image: url('../img/down.png');}
 #zem_rp_wrap .collapsible .collapse-handle:after {clear:both;overflow:hidden;height:0;}
 
 #zem_rp_theme_options_wrap .zem_rp_settings_button {font-size: 1.5em;padding:0 0 0 20px;background: url('../img/arrow_right.png') left center no-repeat;background-position: 3px 3px;}

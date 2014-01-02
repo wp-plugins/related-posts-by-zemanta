@@ -272,6 +272,13 @@ function zem_rp_settings_page() {
 			}
 		}
 
+		if (isset($postdata['zem_classic_state'])) {
+			$meta['classic_user'] = true;
+		} else {
+			$meta['classic_user'] = false;
+		}
+		zem_rp_update_meta($meta);
+
 		$default_thumbnail_path = zem_rp_upload_default_thumbnail_file();
 
 		if($default_thumbnail_path === false) { // no file uploaded
@@ -538,8 +545,12 @@ function zem_rp_settings_page() {
 							</td>
 						</tr>
 						<tr valign="top">
-							<td colspan="2">
-
+							<td colspan="2"><?php if(strpos(get_bloginfo('language'), 'en') === 0): ?>
+								<br/>
+								<label>
+									<input name="zem_classic_state" type="checkbox" id="zem_classic_state" value="yes" <?php checked($meta['classic_user']); ?>>
+									<?php _e("Display Related Posts Recommendations on Compose Screen", 'zemanta_related_posts');?>
+								</label><?php endif; ?>
 								<br />
 								<label>
 									<input name="zem_rp_on_single_post" type="checkbox" id="zem_rp_on_single_post" value="yes" <?php checked($options['on_single_post']); ?>>

@@ -1,14 +1,14 @@
 <?php
 /*
 Plugin Name: Related Posts by Zemanta
-Version: 1.7
+Version: 1.8
 Plugin URI: http://wordpress.org/extend/plugins/zemanta-related-posts/
 Description: Quickly increase your readers' engagement with your posts by adding Related Posts in the footer of your content. Click on <a href="admin.php?page=zemanta-related-posts">Zemanta tab</a> to configure your settings.
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 */
 
-define('ZEM_RP_VERSION', '1.7');
+define('ZEM_RP_VERSION', '1.8');
 
 define('ZEM_RP_PLUGIN_FILE', plugin_basename(__FILE__));
 
@@ -31,6 +31,14 @@ register_deactivation_hook(__FILE__, 'zem_rp_deactivate_hook');
 
 add_action('wp_head', 'zem_rp_head_resources');
 add_action('wp_before_admin_bar_render', 'zem_rp_extend_adminbar');
+
+add_action('plugins_loaded', 'wp_rp_init_zemanta');
+function wp_rp_init_zemanta() {
+	include_once(dirname(__FILE__) . '/zemanta/zemanta.php');
+	if (zem_is_classic()) {
+		$wprp_zemanta = new WPRPZemanta();
+	}
+}
 
 function zem_rp_extend_adminbar() {
 	global $wp_admin_bar;
