@@ -16,10 +16,12 @@ define('ZEM_RP_THUMBNAILS_NAME', 'zem_rp_thumbnail');
 define('ZEM_RP_THUMBNAILS_PROP_NAME', 'zem_rp_thumbnail_prop');
 define('ZEM_RP_THUMBNAILS_WIDTH', 150);
 define('ZEM_RP_THUMBNAILS_HEIGHT', 150);
+define('ZEM_RP_CUSTOM_THUMBNAILS_WIDTH', 150);
+define('ZEM_RP_CUSTOM_THUMBNAILS_HEIGHT', 150);
 define('ZEM_RP_THUMBNAILS_DEFAULTS_COUNT', 31);
 
 
-define('ZEM_RP_STATIC_THEMES_PATH', 'zem-css/');
+define('ZEM_RP_STATIC_THEMES_PATH', 'themes/');
 define('ZEM_RP_STATIC_JSON_PATH', 'json/');
 
 define("ZEM_RP_CTR_DASHBOARD_URL", "http://d.zemanta.com/");
@@ -32,9 +34,6 @@ define("ZEM_RP_STATIC_INFINITE_RECS_JS_FILE", "js/infiniterecs.js");
 define("ZEM_RP_STATIC_PINTEREST_JS_FILE", "js/pinterest.js");
 
 define("ZEM_RP_ZEMANTA_DASHBOARD_URL", "http://prefs.zemanta.com/dash/");
-
-define("ZEM_RP_STATIC_ZEM_RELATED_POSTS_JS_FILE", "js/related_posts.js");
-define("ZEM_RP_STATIC_ZEM_RELATED_POSTS_CSS_FILE", "css/related_posts.css");
 
 define("ZEM_RP_RECOMMENDATIONS_AUTO_TAGS_MAX_WORDS", 200);
 define("ZEM_RP_RECOMMENDATIONS_AUTO_TAGS_MAX_TAGS", 15);
@@ -140,8 +139,14 @@ function zem_rp_upgrade() {
 
 	if($version) {
 		if(version_compare($version, ZEM_RP_VERSION, '<')) {
-			call_user_func('zem_rp_migrate_' . str_replace('.', '_', $version));
-			zem_rp_upgrade();
+			$upgrade_call = 'zem_rp_migrate_' . str_replace('.', '_', $version);
+			if (is_callable($upgrade_call)) {
+				call_user_func($upgrade_call);
+				zem_rp_upgrade();
+			}
+			else {
+				zem_rp_install();
+			}
 		}
 	} else {
 		zem_rp_install();
@@ -210,8 +215,12 @@ function zem_rp_install() {
 		'default_thumbnail_path'		=> false,
 		'thumbnail_use_custom' => false,
 		'thumbnail_custom_field' => '',
+		'custom_size_thumbnail_enabled'	=> false,
+		'custom_thumbnail_width' => ZEM_RP_CUSTOM_THUMBNAILS_WIDTH,
+		'custom_thumbnail_height' => ZEM_RP_CUSTOM_THUMBNAILS_HEIGHT,
 		'display_zemanta_linky' => false,
-
+		'only_admins_can_edit_related_posts' => false,
+		
 		'mobile' => array(
 			'display_comment_count'			=> false,
 			'display_publish_date'			=> false,
@@ -250,6 +259,22 @@ function zem_is_classic() {
 		return true;
 	}
 	return false;
+}
+
+function zem_rp_migrate_1_8() {
+	$zem_rp_meta = get_option('zem_rp_meta');
+	$zem_rp_meta['version'] = '1.8.1';
+	$zem_rp_meta['new_user'] = false;
+	update_option('zem_rp_meta', $zem_rp_meta);
+
+	$zem_rp_options = get_option('zem_rp_options');
+	$zem_rp_options['custom_size_thumbnail_enabled'] = false;
+	$zem_rp_options['custom_thumbnail_width'] = ZEM_RP_CUSTOM_THUMBNAILS_WIDTH;
+	$zem_rp_options['custom_thumbnail_height'] = ZEM_RP_CUSTOM_THUMBNAILS_HEIGHT;
+	$zem_rp_options['only_admins_can_edit_related_posts'] = false;
+	
+	update_option('zem_rp_options', $zem_rp_options);
+
 }
 
 function zem_rp_migrate_1_7() {

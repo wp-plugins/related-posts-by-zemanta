@@ -10,6 +10,9 @@ function zem_rp_add_image_sizes() {
 	if ($platform_options['theme_name'] == 'pinterest.css') {
 		add_image_size(ZEM_RP_THUMBNAILS_PROP_NAME, ZEM_RP_THUMBNAILS_WIDTH, 0, false);
 	}
+	if ($platform_options['custom_size_thumbnail_enabled']) {
+		add_image_size(ZEM_RP_THUMBNAILS_NAME, $platform_options['custom_thumbnail_width'], $platform_options['custom_thumbnail_height'], true);
+	}
 }
 add_action('init', 'zem_rp_add_image_sizes');
 
@@ -29,7 +32,12 @@ function zem_rp_upload_default_thumbnail_file() {
 
 	if ($image_id = media_handle_upload('zem_rp_default_thumbnail', 0)) {
 		$image_data = zem_rp_get_image_data($image_id);
-		if ($image = zem_rp_get_image_with_exact_size($image_data, array(ZEM_RP_THUMBNAILS_WIDTH, ZEM_RP_THUMBNAILS_HEIGHT))) {
+		$platform_options = zem_rp_get_platform_options();
+
+		$img_width = $platform_options['custom_size_thumbnail_enabled'] ? $platform_options['custom_thumbnail_width'] : ZEM_RP_THUMBNAILS_WIDTH;
+		$img_height = $platform_options['custom_size_thumbnail_enabled'] ? $platform_options['custom_thumbnail_height'] : ZEM_RP_THUMBNAILS_HEIGHT;
+
+		if ($image = zem_rp_get_image_with_exact_size($image_data, array($img_width, $img_height))) {
 			$upload_dir = wp_upload_dir();
 			return $upload_dir['url'] . '/' . $image['file'];
 		}
@@ -52,6 +60,9 @@ function zem_rp_upload_attachment($url, $post_id) {
 
 	$tmp = download_url($url);
 	preg_match( '/[^\?]+\.(jpe?g|jpe|gif|png)\b/i', $url, $matches);
+
+	if(! $matches) return;
+
 	$file_array['name'] = sanitize_file_name(urldecode(basename($matches[0])));
 
 	$file_array['tmp_name'] = $tmp;
@@ -62,7 +73,7 @@ function zem_rp_upload_attachment($url, $post_id) {
 
 	$post_data = array(
 		'guid' => $url,
-		'post_title' => 'Zemanta Related Posts Thumbnail',
+		'post_title' => 'rp_' . $file_array['name'],
 	);
 
 	$attachment_id = media_handle_sideload($file_array, $post_id, null, $post_data);
@@ -72,7 +83,11 @@ function zem_rp_upload_attachment($url, $post_id) {
 	}
 
 	$attach_data = wp_get_attachment_metadata($attachment_id);
-	if (!$attach_data || $attach_data['width'] < ZEM_RP_THUMBNAILS_WIDTH || $attach_data['height'] < ZEM_RP_THUMBNAILS_HEIGHT) {
+	$platform_options = zem_rp_get_platform_options();
+	$min_width = $platform_options['custom_size_thumbnail_enabled'] ? $platform_options['custom_size_thumbnail_width'] : ZEM_RP_THUMBNAILS_WIDTH;
+	$min_height = $platform_options['custom_size_thumbnail_enabled'] ? $platform_options['custom_size_thumbnail_height'] : ZEM_RP_THUMBNAILS_HEIGHT;
+
+	if (!$attach_data || $attach_data['width'] < $min_width || $attach_data['height'] < $min_height) {
 		wp_delete_attachment($attachment_id);
 		return false;
 	}
@@ -154,7 +169,9 @@ function zem_rp_cron_do_extract_images_from_post($post_id, $attachment_id) {
 add_action('zem_rp_cron_extract_images_from_post', 'zem_rp_cron_do_extract_images_from_post', 10, 2);
 
 function zem_rp_extract_images_from_post($post, $attachment_id=null) {
-	if(empty($post->post_content) && !$attachment_id) { return; }
+	//WP quirk: posts can have an image, but still no attachment
+	//if(empty($post->post_content) && !$attachment_id) { return; }
+	if(empty($post->post_content) ) { return; }
 
 	delete_post_meta($post->ID, '_zem_rp_image');
 	wp_schedule_single_event(time(), 'zem_rp_cron_extract_images_from_post', array($post->ID, $attachment_id));
@@ -168,7 +185,7 @@ function zem_rp_extract_images_from_post($post, $attachment_id=null) {
 function zem_rp_post_save_update_image($post_id) {
 	$post = get_post($post_id);
 
-	if(empty($post->post_content) || $post->post_status !== 'publish' || $post->post_type === 'page'  || $post->post_type === 'attachment' || $post->post_type === 'nav_menu_item') {
+	if(empty($post->post_content) || $post->post_status !== 'publish' || $post->post_type === 'page' || $post->post_type === 'attachment' || $post->post_type === 'nav_menu_item') {
 		return;
 	}
 
@@ -183,8 +200,15 @@ add_action('save_post', 'zem_rp_post_save_update_image');
  * Get thumbnails when post is displayed
  */
 
-function zem_rp_get_img_tag($src, $alt) {
-	return '<img src="'. esc_attr($src) . '" alt="' . esc_attr($alt) . '" />';
+function zem_rp_get_img_tag($src, $alt, $size=null) {
+	if (!$size || !is_array($size)) {
+		$size = array(ZEM_RP_THUMBNAILS_WIDTH, ZEM_RP_THUMBNAILS_HEIGHT);
+	}
+	$size_attr = ($size[0] ? ('width="' . $size[0] . '" ') : '');
+	if ($size[1]) {
+		$size_attr .= 'height="' . $size[1] . '" ';
+	}
+	return '<img src="'. esc_attr($src) . '" alt="' . esc_attr($alt) . '" '.$size_attr.' />';
 }
 
 function zem_rp_get_default_thumbnail_url($seed = false, $size = 'thumbnail') {
@@ -210,12 +234,33 @@ function zem_rp_get_image_with_exact_size($image_data, $size) {
 	# Partially copied from wp-include/media.php image_get_intermediate_size and image_downsize
 	if (!$image_data) { return false; }
 
+	$platform_options = zem_rp_get_platform_options();
 	$img_url = wp_get_attachment_url($image_data['id']);
 	$img_url_basename = wp_basename($img_url);
 
 	// Calculate exact dimensions for proportional images
 	if (!$size[0]) { $size[0] = (int) ($image_data['data']['width'] / $image_data['data']['height'] * $size[1]); }
 	if (!$size[1]) { $size[1] = (int) ($image_data['data']['height'] / $image_data['data']['width'] * $size[0]); }
+
+	if (!$image_data['data']['sizes']) {
+		$w = $image_data['data']['width'];
+		$h = $image_data['data']['height'];
+
+		$thumb_width = $platform_options['custom_size_thumbnail_enabled'] ? $platform_options['custom_thumbnail_width'] : ZEM_RP_THUMBNAILS_WIDTH;
+		$thumb_height = $platform_options['custom_size_thumbnail_enabled'] ? $platform_options['custom_thumbnail_height'] : ZEM_RP_THUMBNAILS_HEIGHT;
+
+		if ($w == $thumb_width && $h == $thumb_height) {
+			$file = explode("/", $image_data['data']['file']);
+			$file = $file[count($file) - 1];
+			$img_url = str_replace($img_url_basename, wp_basename($file), $img_url);
+			return array(
+				'url' => $img_url,
+				'file' => $file,
+				'width' => $w,
+				'height' => $h
+			);
+		}
+	}
 
 	foreach ($image_data['data']['sizes'] as $_size => $data) {
 		// width and height can be both string and integers. WordPress..
@@ -288,8 +333,12 @@ function zem_rp_get_attached_img_url($related_post, $size) {
 	return false;
 }
 
-function zem_rp_get_thumbanil_size_array($size) {
+function zem_rp_get_thumbnail_size_array($size) {
+	$platform_options = zem_rp_get_platform_options();
 	if (!$size || $size === 'thumbnail') {
+		if ($platform_options['custom_size_thumbnail_enabled']) {
+			return array($platform_options['custom_thumbnail_width'], $platform_options['custom_thumbnail_height']);
+		}
 		return array(ZEM_RP_THUMBNAILS_WIDTH, ZEM_RP_THUMBNAILS_HEIGHT);
 	}
 	if ($size == 'full') {
@@ -312,26 +361,26 @@ function zem_rp_get_post_thumbnail_img($related_post, $size = null, $force = fal
 	$post_title = wptexturize($related_post->post_title);
 
 	if (property_exists($related_post, 'thumbnail')) {
-		return zem_rp_get_img_tag($related_post->thumbnail, $post_title);
+		return zem_rp_get_img_tag($related_post->thumbnail, $post_title, $size);
 	}
 
-	$size = zem_rp_get_thumbanil_size_array($size);
+	$size = zem_rp_get_thumbnail_size_array($size);
 	if (!$size) { return false; }
 
 	if ($options['thumbnail_use_custom']) {
 		$thumbnail_src = get_post_meta($related_post->ID, $options["thumbnail_custom_field"], true);
 
 		if ($thumbnail_src) {
-			return zem_rp_get_img_tag($thumbnail_src, $post_title);
+			return zem_rp_get_img_tag($thumbnail_src, $post_title, $size);
 		}
 	}
 
 	$attached_img_url = zem_rp_get_attached_img_url($related_post, $size);
 	if ($attached_img_url) {
-		return zem_rp_get_img_tag($attached_img_url, $post_title);
+		return zem_rp_get_img_tag($attached_img_url, $post_title, $size);
 	}
 
-	return zem_rp_get_img_tag(zem_rp_get_default_thumbnail_url($related_post->ID, $size), $post_title);
+	return zem_rp_get_img_tag(zem_rp_get_default_thumbnail_url($related_post->ID, $size), $post_title, $size);
 }
 
 function zem_rp_process_latest_post_thumbnails() {
@@ -367,12 +416,10 @@ function zem_rp_img_html_to_post_id( $html, &$matched_html = null ) {
 	if ( ! preg_match_all( '#class=([\'"])(.+?)\1#is', $matched_html, $matches ) || empty( $matches ) )
 		return $attachment_id;
 
-	$attr = array();
-	foreach ( $matches[1] as $key => $attribute_name )
-		$attr[ $attribute_name ] = $matches[2][ $key ];
+	$img_class = $matches[2][0];
 
-	if ( ! $attachment_id && ! empty( $attr['class'] ) && false !== strpos( $attr['class'], 'wp-image-' ) )
-		if ( preg_match( '#wp-image-([0-9]+)#i', $attr['class'], $matches ) )
+	if ( ! $attachment_id && ! empty( $img_class ) && false !== strpos( $img_class, 'wp-image-' ) )
+		if ( preg_match( '#wp-image-([0-9]+)#i', $img_class, $matches ) )
 			$attachment_id = absint( $matches[1] );
 
 	return $attachment_id;

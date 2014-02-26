@@ -53,16 +53,16 @@ function zem_rp_admin_connect_notice() {
 		</div>
 		<div id="zem-rp-wrap-container">
 			<div id="zem-rp-connect-wrap">
-				<a id="zem-rp-login" target="_blank" href="<?php echo $register_url; ?>">Connect</a>
+				<a id="zem-rp-login" target="_blank" href="<?php echo $register_url; ?>"><?php _e('Connect','zemanta_related_posts'); ?></a>
 			</div>
 			<div id="zem-rp-text-container">
-				<h4>Related Posts by Zemanta are almost ready,</h4>
-				<h4>now all you need to do is connect to our service.</h4>
+				<h4><?php _e('Related Posts by Zemanta are almost ready,','zemanta_related_posts');?></h4>
+				<h4><?php _e('now all you need to do is connect to our service.','zemanta_related_posts'); ?></h4>
 			</div>
 		</div>
 		<div id="zem-rp-bottom-container">
-			<p>By turning on Related Posts you agree to <a href="http://www.zemanta.com/rp-tos" target="_blank">terms of service.</a></p>
-			<p>You'll get Advanced Settings, Themes, Thumbnails and Analytics Dashboard. These features are provided by <a target="_blank" href="http://www.zemanta.com">Zemanta</a> as a service.</p>
+			<p><?php _e('By turning on Related Posts you agree to ','zemanta_related_posts'); ?><a href="http://www.zemanta.com/rp-tos" target="_blank"><?php _e('terms of service.','zemanta_related_posts');?></a></p>
+			<p><?php _e('You\'ll get Advanced Settings, Themes, Thumbnails and Analytics Dashboard. These features are provided by ','zemanta_related_posts');?><a target="_blank" href="http://www.zemanta.com">Zemanta</a> <?php _e('as a service.','zemanta_related_posts'); ?></p>
 		</div>
 	</div>
 	<script type="text/javascript">

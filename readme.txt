@@ -3,8 +3,8 @@ Contributors: zemanta
 Tags: zemanta,related,posts,post,related posts,plugin,related content
 License: GPLv2
 Requires at least: 3.3
-Tested up to: 3.6
-Stable tag: 1.8
+Tested up to: 3.8.1
+Stable tag: 1.8.1
 
 Zemanta recommends your content to new audiences both on your blog and across our network of high-quality sites.
 
@@ -71,6 +71,15 @@ New thumbnailer might break backwards compatibility for blogs with custom thumbn
 Fix for security vulnerability. Upgrade immediately.
 
 == Changelog ==
+
+= 1.8.1 =
+* Fixed Zemanta Readside plugins incompatibility
+* Uninstallation added
+* Fixed migration bugs
+* Added support for custom size thumbnail 
+* Bug fixes for thumbnailer
+* Added support for Open Graph plugins
+* Optimized thumbnail rendering
 
 = 1.8 =
 * Added Zemanta Editorial Assistant

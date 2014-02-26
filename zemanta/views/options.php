@@ -11,9 +11,9 @@
          <iframe src="http://player.vimeo.com/video/46745200?title=0&amp;byline=0&amp;portrait=0" width="100%" height="280px" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
         </div>
         <p>
-          <a href="http://prefs.zemanta.com/" target="_blank" class="signin-button prefs-signin">Sign In</a>
+          <a href="http://prefs.zemanta.com/" target="_blank" class="signin-button prefs-signin"><?php _e('Sign In','zemanta_related_posts'); ?></a>
         </p>
-        <p class="below-signin-button"><a href="http://prefs.zemanta.com/" target="_blank" class="prefs-signin">to check stats, change settings and more</a></p>
+        <p class="below-signin-button"><a href="http://prefs.zemanta.com/" target="_blank" class="prefs-signin"><?php _e('to check stats, change settings and more','zemanta_related_posts');?></a></p>
       </div>
       <div class="col-right">
         <div id="tweets_div"></div>
@@ -27,7 +27,7 @@
 
 	<?php if(!$is_pro) : ?>
     <p class="submit">
-      <input name="Submit" type="submit" value="<?php esc_attr_e('Save Changes'); ?>" class="button-primary" />
+      <input name="Submit" type="submit" value="<?php esc_attr_e('Save Changes','zemanta_related_posts'); ?>" class="button-primary" />
     </p>
 	<?php endif; ?>
     
