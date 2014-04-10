@@ -15,6 +15,11 @@ Zemanta Related Posts can increase your internal traffic up to 10%. Zemanta also
 Easily increase your reach and readership with Zemanta.
 Recommendations are provided by Zemanta's world-class semantic service, including advanced analytics.
 
+**Share the Link Love**
+
+[vimeo http://vimeo.com/91619828]
+
+
 == Frequently Asked Questions ==
 
 = What is Related Posts by Zemanta? =
