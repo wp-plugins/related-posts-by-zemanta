@@ -34,6 +34,8 @@ define("ZEM_RP_STATIC_INFINITE_RECS_JS_FILE", "js/infiniterecs.js");
 define("ZEM_RP_STATIC_PINTEREST_JS_FILE", "js/pinterest.js");
 
 define("ZEM_RP_ZEMANTA_DASHBOARD_URL", "http://prefs.zemanta.com/dash/");
+define("ZEM_RP_ZEMANTA_SUBSCRIPTION_URL", "http://prefs.zemanta.com/api/");
+define("ZEM_RP_ZEMANTA_API_URL", "http://api.zemanta.com/services/rest/0.0/");
 
 define("ZEM_RP_RECOMMENDATIONS_AUTO_TAGS_MAX_WORDS", 200);
 define("ZEM_RP_RECOMMENDATIONS_AUTO_TAGS_MAX_TAGS", 15);
@@ -48,9 +50,10 @@ define("ZEM_RP_THUMBNAILS_NUM_PREGENERATED_POSTS", 50);
 
 define("ZEM_RP_MAX_LABEL_LENGTH", 32);
 
-global $zem_rp_options, $zem_rp_meta;
+global $zem_rp_options, $zem_rp_meta, $zem_global_notice_pages;
 $zem_rp_options = false;
 $zem_rp_meta = false;
+$zem_global_notice_pages = array('plugins.php', 'index.php', 'update-core.php');
 
 function zem_rp_get_options() {
 	global $zem_rp_options, $zem_rp_meta;
@@ -71,7 +74,7 @@ function zem_rp_get_options() {
 	$zem_rp_options = new ArrayObject($zem_rp_options);
 
 	if ($zem_rp_meta['blog_id']) {
-		define('ZEM_RP_ZEMANTA_CONTENT_BASE_URL', 'http://content.zemanta.com/static/');
+		define('ZEM_RP_ZEMANTA_CONTENT_BASE_URL', 'https://content.zemanta.com/static/');
 	}
 
 	return $zem_rp_options;
@@ -113,6 +116,15 @@ function zem_rp_update_options($new_options) {
 	}
 
 	return $r;
+}
+
+function zem_rp_set_global_notice() {
+	$meta = get_option('zem_rp_meta');
+	$meta['global_notice'] = array(
+		'title' => 'I\'ve installed Wordpress Related Posts plugin. Now what?',
+		'message' => 'Checkout how you can <a target="_blank" href="http://zem.si/1kGo9V6">create awesome content</a>. Hint: it\'s not all about YOU ;-)'
+	);
+	update_option('zem_rp_meta', $meta);
 }
 
 function zem_rp_activate_hook() {
@@ -197,7 +209,10 @@ function zem_rp_install() {
 		'remote_recommendations' => false,
 		'name' => '',
 		'email' => '',
+		'subscribed' => false,
+		'registered' => false,
 		'remote_notifications' => array(),
+		'global_notice' => null,
 		'show_statistics' => false,
 		'show_traffic_exchange' => false,
 		'zemanta_username' => false,
@@ -251,6 +266,7 @@ function zem_rp_install() {
 	zem_rp_related_posts_db_table_install();
 
 	zem_rp_process_latest_post_thumbnails();
+	zem_rp_set_global_notice();
 }
 
 function zem_is_classic() {
@@ -259,6 +275,18 @@ function zem_is_classic() {
 		return true;
 	}
 	return false;
+}
+
+function zem_rp_migrate_1_8_1() {
+	$zem_rp_meta = get_option('zem_rp_meta');
+	$zem_rp_meta['version'] = '1.8.2';
+	$zem_rp_meta['new_user'] = false;
+
+	$zem_rp_meta['subscribed'] = false;
+	$zem_rp_meta['registered'] = false;
+	
+	update_option('zem_rp_meta', $zem_rp_meta);
+	zem_rp_set_global_notice();
 }
 
 function zem_rp_migrate_1_8() {
@@ -274,7 +302,6 @@ function zem_rp_migrate_1_8() {
 	$zem_rp_options['only_admins_can_edit_related_posts'] = false;
 	
 	update_option('zem_rp_options', $zem_rp_options);
-
 }
 
 function zem_rp_migrate_1_7() {

@@ -44,17 +44,15 @@ function zem_rp_settings_admin_menu() {
 		return;
 	}
 
-	$title = 'Zemanta';
+	$title = __('Related Posts by Zemanta', 'zemanta_related_posts');
 	$count = zem_rp_number_of_available_notifications();
 
 	if($count) {
 		$title .= ' <span class="update-plugins count-' . $count . '"><span class="plugin-count">' . $count . '</span></span>';
 	}
 	
-	$page = add_menu_page(__('Related Posts by Zemanta', 'zemanta_related_posts'), $title, 
-						'manage_options', 'zemanta-related-posts', 'zem_rp_settings_page', 'div');
-
-	add_action('admin_print_styles-' . $page, 'zem_rp_settings_styles');
+	$page = add_options_page(__('Related Posts by Zemanta', 'zemanta_related_posts'), $title, 
+							'manage_options', 'zemanta-related-posts', 'zem_rp_settings_page');
 	add_action('admin_print_scripts-' . $page, 'zem_rp_settings_scripts');
 }
 
@@ -67,6 +65,91 @@ function zem_rp_settings_styles() {
 	wp_enqueue_style("zem_rp_dashaboard_style", plugins_url("static/css/dashboard.css", __FILE__), array(), ZEM_RP_VERSION);
 }
 
+function zem_rp_get_blog_email() {
+	$meta = zem_rp_get_meta();
+	if($meta['email']) return $meta["email"];
+
+	$req_options = array(
+		'timeout' => 30
+	);
+	$url = ZEM_RP_ZEMANTA_DASHBOARD_URL . 'get_email?blog_id=' . $meta['blog_id'] .
+		'&auth_key=' . $meta['auth_key'];
+	$response = wp_remote_get($url, $req_options);
+
+	if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) == 200) {
+		$body = wp_remote_retrieve_body($response);
+		if ($body) {
+			$doc = json_decode($body);
+			if ($doc->status === 'ok') {
+				$meta["email"] = $doc->email;
+				zem_rp_update_meta($meta);
+				return $meta["email"];
+			}
+		}
+	}
+	return false;
+}
+
+function zem_rp_get_api_key() {
+	$meta = zem_rp_get_meta();
+	if($meta['zemanta_api_key']) return $meta['zemanta_api_key'];
+
+	$zemanta_options = get_option('zemanta_options');
+	if ($zemanta_options && !empty($zemanta_options['api_key'])) {
+		$meta['zemanta_api_key'] = $zemanta_options['api_key'];
+		zem_rp_update_meta($meta);
+		return $meta['zemanta_api_key'];
+	}
+	return false;
+}
+
+function zem_rp_subscribe($email_or_unsubscribe) {
+	$meta = zem_rp_get_meta();
+	if($meta['zemanta_api_key']) {
+		$post = array(
+			'api_key' => $meta['zemanta_api_key'],
+			'platform' => 'wordpress-zem',
+			'subscriptions' => 'activityreport'
+		);
+		if ($email_or_unsubscribe) {
+			$post['email'] = $email_or_unsubscribe;
+		}
+		$response = wp_remote_post(ZEM_RP_ZEMANTA_SUBSCRIPTION_URL . 'subscribe/', array(
+			'body' => $post,
+			'timeout' => 30
+		));
+		if (wp_remote_retrieve_response_code($response) == 200) {
+			$body = wp_remote_retrieve_body($response);
+			if ($body) {
+				$response_json = json_decode($body);
+				if ($response_json->status !== 'ok') return false;
+				
+				$meta['subscribed'] = (int) !!$email_or_unsubscribe;
+				zem_rp_update_meta($meta);
+				return true; // don't subscribe to bf if zem succeeds
+			}
+		}
+	}
+	return false;
+}
+
+function zem_rp_ajax_subscribe_callback () {
+	check_ajax_referer('zem_rp_ajax_nonce');
+	$meta = zem_rp_get_meta();
+	if(! $meta['email']) { print "0"; die(); }
+
+	$subscribe = !empty($_POST['subscribe']) ? $_POST['subscribe'] : false;
+	if (wp_rp_subscription($subscribe ? $meta['email'] : false, true)) {
+		print "1";
+	}
+	else {
+		print "0";
+	}
+	die();
+}
+
+add_action('wp_ajax_zem_subscribe', 'zem_rp_ajax_subscribe_callback');
+  
 function zem_rp_register_blog() {
 	$meta = zem_rp_get_meta();
 
@@ -175,7 +258,7 @@ function zem_rp_register_blog_and_login() {
 			, 302);
 		exit;
 	} else {
-		wp_remote_get('http://content.zemanta.com/static/stats.gif?error=register_blog&data=' . urlencode($register_blog_response));
+		wp_remote_get('https://wprpp.s3.amazonaws.com/static/stats.gif?error=register_blog&data=' . urlencode($register_blog_response));
 		die('Something went wrong, please reload this site. Error: ' . $register_blog_response);
 	}
 }
@@ -202,14 +285,66 @@ function zem_rp_ajax_hide_show_statistics() {
 
 add_action('wp_ajax_rp_show_hide_statistics', 'zem_rp_ajax_hide_show_statistics');
 
+function zem_rp_register() {
+	$meta = zem_rp_get_meta();
+	if ($meta['registered']) {
+		return;
+	}
+	$api_key = zem_rp_get_api_key();
+	if(! $api_key) {
+		$wprp_zemanta = new WPRPZemanta();
+		$wprp_zemanta->init(); // we have to do this manually because the admin_init hook was already triggered
+		$wprp_zemanta->register_options();
+		
+		$api_key = $wprp_zemanta->api_key;
+		$meta['zemanta_api_key'] = $api_key;
+	}
+	if (!$api_key) { return false; }
+
+	$url = urlencode(get_bloginfo('wpurl'));
+	$post = array(
+		'api_key' => $api_key,
+		'platform' => 'wordpress-zem',
+		'post_rid' => '',
+		'post_url' => $url,
+		'current_url' => $url,
+		'format' => 'json',
+		'method' => 'zemanta.post_published_ping'
+	);
+	$response = wp_remote_post(ZEM_RP_ZEMANTA_API_URL, array(
+		'body' => $post,
+		'timeout' => 30
+	));
+	if (wp_remote_retrieve_response_code($respone) == 200) {
+		$body = wp_remote_retrieve_body($response);
+		if ($body) {
+			$response_json = json_decode($body);
+			$meta['registered'] = $response_json->status === 'ok';
+		}
+	}
+
+	zem_rp_update_meta($meta);
+	return $meta['registered'];
+}
+
 function zem_rp_settings_page() {
 	if (!current_user_can('delete_users')) {
 		die('Sorry, you don\'t have permissions to access this page.');
 	}
-
+	zem_rp_register();
+	$email = zem_rp_get_blog_email();
 	$options = zem_rp_get_options();
 	$meta = zem_rp_get_meta();
 
+	if ($email && !$meta['subscribed']) {
+		zem_rp_subscribe($email);
+	}
+	
+	if (isset( $_GET['zem_global_notice'] ) && $_GET['zem_global_notice'] === '0') {
+		$meta['global_notice'] = null;
+		zem_rp_update_meta($meta);
+	}
+	
 	$postdata = stripslashes_deep($_POST);
 
 	// load notifications every time user goes to settings page

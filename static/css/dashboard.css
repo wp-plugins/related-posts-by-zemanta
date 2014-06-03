@@ -26,7 +26,7 @@
 #zem_rp_wrap div#zem_rp_statistics_wrap ul.statistics li {position: relative; overflow: hidden; border-bottom: 1px solid #ddd; margin: 0; height: 60px;}
 #zem_rp_wrap div#zem_rp_statistics_wrap ul.statistics li h5 {text-transform: uppercase; text-align: center; font-weight: normal; padding: 5px 0; margin: 20px auto 0 auto; font-size: 13px;}
 #zem_rp_wrap div#zem_rp_statistics_wrap ul.statistics li h5 span {text-transform: lowercase; font-size: 11px; color: #999; margin-left: 10px;}
-#zem_rp_wrap div#zem_rp_statistics_wrap ul.statistics li p.num {position: absolute; right: 0; font-size: 40px; line-height: 40px; color: #82c1cb; font-weight: bold; margin: 10px 0;}
+#zem_rp_wrap div#zem_rp_statistics_wrap ul.statistics li p.num {position: absolute; right: 0; font-size: 26px; line-height: 40px; color: #82c1cb; font-weight: bold; margin: 10px 0;}
 #zem_rp_wrap div#zem_rp_statistics_wrap ul.statistics li p.num.mobile {position: absolute; left: 0;}
 
 #zem_rp_dashboard_widget #zem_rp_wrap div#zem_rp_statistics_wrap ul.statistics li.clicks {border-bottom: 0;}
@@ -154,3 +154,11 @@ form.zem_rp_message_form a.dismiss {float: right;}
 #zem-rp-message #zem-rp-wrap-container #zem-rp-text-container h4 {margin: 0.5em 0 0em 0;}
 #zem-rp-message #zem-rp-bottom-container {min-width: 1000px;padding: 6px 24px;}
 #zem-rp-message #zem-rp-bottom-container p {color:#000;font-weight:100;}
+
+#wpwrap #wpcontent .zem-rp-updated {position: relative;	margin: 5px 0 15px; padding: 1px 12px; background-color: #fff; border-left: 4px solid #f58520; -webkit-box-shadow: 0 1px 1px 0 rgba(0,0,0,.1); box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);}
+#wpwrap #wpcontent .zem-rp-updated p {font-size: 1.3em;}
+#wpwrap #wpcontent .zem-rp-updated p a {color: inherit; text-decoration: underline;}
+#wpwrap #wpcontent .zem-rp-updated .zem-rp-logo {position: absolute; bottom: 15px; right: 12px;}
+#wpwrap #wpcontent .zem-rp-updated .zem-rp-dismiss {position: absolute;top: 15px;right: 14px;}
+#wpwrap #wpcontent .zem-rp-updated .zem-rp-logo img {width: 90px;}
+#wpwrap #wpcontent .zem-rp-updated .zem-rp-dismiss a:before {content: '\f153'; display: inline-block; font: 400 16px/1 dashicons; speak: none; height: 20px; margin: 2px 0; text-align: center; vertical-align: middle; width: 20px; -webkit-font-smoothing: antialiased!important;} 

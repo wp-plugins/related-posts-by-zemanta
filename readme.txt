@@ -3,8 +3,8 @@ Contributors: zemanta
 Tags: zemanta,related,posts,post,related posts,plugin,related content
 License: GPLv2
 Requires at least: 3.3
-Tested up to: 3.9
-Stable tag: 1.8.1
+Tested up to: 3.8.1
+Stable tag: 1.8.2
 
 Zemanta recommends your content to new audiences both on your blog and across our network of high-quality sites.
 
@@ -14,11 +14,6 @@ Zemanta recommends your content to new audiences both on your blog and across ou
 Zemanta Related Posts can increase your internal traffic up to 10%. Zemanta also brings new visitors from other sites and bumps your site's unique visits. Add Related Rosts from your own site and from across the web. Search for posts and hand-pick them with ease.
 Easily increase your reach and readership with Zemanta.
 Recommendations are provided by Zemanta's world-class semantic service, including advanced analytics.
-
-**Share the Link Love**
-
-[vimeo http://vimeo.com/91619828]
-
 
 == Frequently Asked Questions ==
 
@@ -76,6 +71,13 @@ New thumbnailer might break backwards compatibility for blogs with custom thumbn
 Fix for security vulnerability. Upgrade immediately.
 
 == Changelog ==
+
+= 1.8.2 =
+* Link to settings moved from main menu to Settings submenu
+* Fixed incompatibility with Editorial Assistant
+* HTTPS support
+* Dashboard Statistics bugfix
+* Removed 'Related Posts' link from top admin bar
 
 = 1.8.1 =
 * Fixed Zemanta Readside plugins incompatibility
