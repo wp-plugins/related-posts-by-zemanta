@@ -42,6 +42,5 @@ function zem_rp_display_dashboard_widget() {
 function zem_rp_dashboard_scripts($hook) {
 	if($hook === 'index.php') {
 		wp_enqueue_script('zem_rp_dashboard_script', plugins_url('static/js/dashboard.js', __FILE__), array('jquery'));
-		wp_enqueue_style('zem_rp_dashaboard_style', plugins_url('static/css/dashboard.css', __FILE__));
 	}
 }

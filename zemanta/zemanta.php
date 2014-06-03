@@ -22,6 +22,9 @@ class WPRPZemanta {
 
 	public function __construct()
 	{
+		if (defined('ZEMANTA_PLUGIN_VERSION_OPTION')) { // Make sure this doesn't clash with the Editorial Assistant
+			return;
+		}
 		global $wp_version;
 		
 		// initialize update notes shown once on plugin update
@@ -30,7 +33,7 @@ class WPRPZemanta {
 		$this->update_notes['1.0.8'] = __('Please double-check your upload paths in Zemanta Settings, we changed some things that might affect your images.', 'zemanta');
 		
 		add_action('admin_init', array($this, 'init'));
-		add_action('admin_init', array($this, 'register_options'));
+		// add_action('admin_init', array($this, 'register_options')); // Why 
 
 		register_activation_hook(dirname(__FILE__) . '/zemanta.php', array($this, 'activate'));
 		
@@ -44,9 +47,6 @@ class WPRPZemanta {
 	*
 	*/
 	public function init() {
-		if (defined('ZEMANTA_PLUGIN_VERSION_OPTION')) { // Make sure this doesn't clash with the Editorial Assistant
-			return;
-		}
 
 		add_action('wp_ajax_zemanta_set_featured_image', array($this, 'ajax_zemanta_set_featured_image'));
 		add_action('edit_form_advanced', array($this, 'assets'), 1);
@@ -59,6 +59,8 @@ class WPRPZemanta {
 		
 		if(!$this->check_dependencies())
 			add_action('admin_notices', array($this, 'warning'));
+
+		$this->register_options();
 	}
 
 	/**

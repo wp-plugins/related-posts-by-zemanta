@@ -40,6 +40,9 @@ function zem_rp_prepare_admin_connect_notice() {
 }
 
 function zem_rp_admin_connect_notice() {
+	if (!current_user_can('delete_users')) {
+		return;
+	}
 	wp_enqueue_style( 'zem_rp_connect_style' );
 	wp_enqueue_script( 'zem_rp_connect_js' );
 
@@ -61,7 +64,7 @@ function zem_rp_admin_connect_notice() {
 			</div>
 		</div>
 		<div id="zem-rp-bottom-container">
-			<p><?php _e('By turning on Related Posts you agree to ','zemanta_related_posts'); ?><a href="http://www.zemanta.com/rp-tos" target="_blank"><?php _e('terms of service.','zemanta_related_posts');?></a></p>
+			<p><?php _e('By turning on Related Posts you agree to ','zemanta_related_posts'); ?><a href="http://www.zemanta.com/blog/about/related-posts-terms-of-service/" target="_blank"><?php _e('terms of service.','zemanta_related_posts');?></a></p>
 			<p><?php _e('You\'ll get Advanced Settings, Themes, Thumbnails and Analytics Dashboard. These features are provided by ','zemanta_related_posts');?><a target="_blank" href="http://www.zemanta.com">Zemanta</a> <?php _e('as a service.','zemanta_related_posts'); ?></p>
 		</div>
 	</div>
