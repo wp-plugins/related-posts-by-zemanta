@@ -20,11 +20,10 @@ define('ZEM_RP_CUSTOM_THUMBNAILS_WIDTH', 150);
 define('ZEM_RP_CUSTOM_THUMBNAILS_HEIGHT', 150);
 define('ZEM_RP_THUMBNAILS_DEFAULTS_COUNT', 31);
 
-
 define('ZEM_RP_STATIC_THEMES_PATH', 'themes/');
 define('ZEM_RP_STATIC_JSON_PATH', 'json/');
 
-define("ZEM_RP_CTR_DASHBOARD_URL", "http://d.zemanta.com/");
+define("ZEM_RP_CTR_DASHBOARD_URL", "https://d.zemanta.com/");
 define("ZEM_RP_STATIC_CTR_PAGEVIEW_FILE", "js/pageview.js");
 
 define("ZEM_RP_STATIC_RECOMMENDATIONS_JS_FILE", "js/recommendations.js");
@@ -36,6 +35,7 @@ define("ZEM_RP_STATIC_PINTEREST_JS_FILE", "js/pinterest.js");
 define("ZEM_RP_ZEMANTA_DASHBOARD_URL", "http://prefs.zemanta.com/dash/");
 define("ZEM_RP_ZEMANTA_SUBSCRIPTION_URL", "http://prefs.zemanta.com/api/");
 define("ZEM_RP_ZEMANTA_API_URL", "http://api.zemanta.com/services/rest/0.0/");
+define('ZEM_RP_ZEMANTA_CONTENT_BASE_URL', 'https://content.zemanta.com/static/');
 
 define("ZEM_RP_RECOMMENDATIONS_AUTO_TAGS_MAX_WORDS", 200);
 define("ZEM_RP_RECOMMENDATIONS_AUTO_TAGS_MAX_TAGS", 15);
@@ -72,10 +72,6 @@ function zem_rp_get_options() {
 
 	$zem_rp_meta = new ArrayObject($zem_rp_meta);
 	$zem_rp_options = new ArrayObject($zem_rp_options);
-
-	if ($zem_rp_meta['blog_id']) {
-		define('ZEM_RP_ZEMANTA_CONTENT_BASE_URL', 'https://content.zemanta.com/static/');
-	}
 
 	return $zem_rp_options;
 }
@@ -121,7 +117,7 @@ function zem_rp_update_options($new_options) {
 function zem_rp_set_global_notice() {
 	$meta = get_option('zem_rp_meta');
 	$meta['global_notice'] = array(
-		'title' => 'I\'ve installed Wordpress Related Posts plugin. Now what?',
+		'title' => 'I\'ve installed Related Posts by Zemanta plugin. Now what?',
 		'message' => 'Checkout how you can <a target="_blank" href="http://zem.si/1kGo9V6">create awesome content</a>. Hint: it\'s not all about YOU ;-)'
 	);
 	update_option('zem_rp_meta', $meta);
@@ -199,8 +195,6 @@ function zem_rp_related_posts_db_table_install() {
 
 function zem_rp_install() {
 	$zem_rp_meta = array(
-		'blog_id' => false,
-		'auth_key' => false,
 		'zemanta_api_key' => false,
 		'version' => ZEM_RP_VERSION,
 		'first_version' => ZEM_RP_VERSION,
@@ -211,10 +205,7 @@ function zem_rp_install() {
 		'email' => '',
 		'subscribed' => false,
 		'registered' => false,
-		'remote_notifications' => array(),
 		'global_notice' => null,
-		'show_statistics' => false,
-		'show_traffic_exchange' => false,
 		'zemanta_username' => false,
 		'classic_user' => strpos(get_bloginfo('language'), 'en') === 0 // Enable only if "any" english is the default language
 	);
@@ -235,17 +226,9 @@ function zem_rp_install() {
 		'custom_thumbnail_height' => ZEM_RP_CUSTOM_THUMBNAILS_HEIGHT,
 		'display_zemanta_linky' => false,
 		'only_admins_can_edit_related_posts' => false,
+
+		'subscription_types' => false,
 		
-		'mobile' => array(
-			'display_comment_count'			=> false,
-			'display_publish_date'			=> false,
-			'display_thumbnail'			=> true,
-			'display_excerpt'			=> false,
-			'excerpt_max_length'			=> 200,
-			'theme_name' 				=> 'm-stream.css',
-			'theme_custom_css'			=> ZEM_RP_DEFAULT_CUSTOM_CSS,
-			'custom_theme_enabled' => false
-		),
 		'desktop' => array(
 			'display_comment_count'			=> false,
 			'display_publish_date'			=> false,
@@ -255,13 +238,11 @@ function zem_rp_install() {
 			'theme_name' 				=> 'vertical.css',
 			'theme_custom_css'			=> ZEM_RP_DEFAULT_CUSTOM_CSS,
 			'custom_theme_enabled' => false
-		),
+		)
 	);
 
 	update_option('zem_rp_meta', $zem_rp_meta);
 	update_option('zem_rp_options', $zem_rp_options);
-
-	zem_rp_register_blog();
 
 	zem_rp_related_posts_db_table_install();
 
@@ -275,6 +256,28 @@ function zem_is_classic() {
 		return true;
 	}
 	return false;
+}
+
+function zem_rp_migrate_1_8_2() {
+	$meta = get_option('zem_rp_meta');
+	$meta['version'] = '1.9';
+	$meta['new_user'] = false;
+
+	$meta_to_remove = array(
+		'remote_notifications', 'show_statistics',
+		'show_traffic_exchange', 'blog_id', 'auth_key'
+	);
+	foreach($meta_to_remove as $setting) {
+		if (isset($meta[$settings])) {
+			unset($meta[$setting]);
+		}
+	}
+
+	update_option('zem_rp_meta', $meta);
+
+	$options = get_option('zem_rp_options');
+	unset($options['mobile']);
+	update_option('zem_rp_options', $options);
 }
 
 function zem_rp_migrate_1_8_1() {
