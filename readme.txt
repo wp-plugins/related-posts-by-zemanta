@@ -58,7 +58,7 @@ We adopted the principle of having three "release channels". You can try the mos
 
 == Screenshots ==
 1. Zemanta Related Posts Default Theme.
-3. Zemanta Related Posts responsive theme on a Galaxy Nexus and iPhone 4s.
+2. Zemanta Related Posts responsive theme on a Galaxy Nexus and iPhone 4s.
 
 == Upgrade Notice ==
 
