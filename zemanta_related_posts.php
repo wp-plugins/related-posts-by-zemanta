@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Related Posts by Zemanta
-Version: 1.9
+Version: 1.9.1
 Plugin URI: http://wordpress.org/support/plugin/related-posts-by-zemanta
 Description: Quickly increase your readers' engagement with your posts by adding Related Posts in the footer of your content. Click on <a href="admin.php?page=zemanta-related-posts">Zemanta tab</a> to configure your settings.
 Author: Zemanta Ltd.
@@ -26,12 +26,12 @@ if (! function_exists('wp_rp_init_zemanta')) {
 	}
 }
 else {
-	function wp_rp_multiple_plugins_notice() {
+	function zem_multiple_plugins_notice() {
 		?>
 		<div class="updated">
         <p><?php _e( 'Oh, it\'s OK, looks like you\'ve already got one related posts plugin installed, so no need for another one.', 'wp_wp_related_posts' ); ?></p>
 		</div>
 		<?php
 	}
-	add_action( 'admin_notices', 'wp_rp_multiple_plugins_notice' );
+	add_action( 'admin_notices', 'zem_multiple_plugins_notice' );
 }

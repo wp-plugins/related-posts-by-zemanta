@@ -100,6 +100,7 @@ function zem_rp_subscribe($email_or_unsubscribe, $subscription_types) {
 		$post = array(
 			'api_key' => $meta['zemanta_api_key'],
 			'platform' => 'wordpress-zem',
+			'url' => get_site_url(),
 			'subscriptions' => $subscription_types
 		);
 
@@ -328,6 +329,7 @@ function zem_rp_settings_page() {
 	}
 
 	$settings_file = __FILE__;
+	$blog_url = get_site_url();
 	
 	include zem_rp_get_template('settings');
 }

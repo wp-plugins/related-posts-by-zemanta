@@ -32,7 +32,7 @@
 				<tr valign="top">
 					<th scope="row"></th>
 					<td>
-						<?php _e("We know when Zemanta users link to each other and we know when they link to you! Subscribe and <strong>we'll let you know</strong> when this happens.", 'zemanta_related_posts'); ?>
+					    <?php _e("Subscribe and we'll start monitoring our network for your <a href=\"$blog_url\" target=\"_blank\">blog</a>. <br />We'll <strong>let you know</strong> when somebody links to you.", 'wp_related_posts'); ?>
 					</td>
 				</tr>
 			</table>
