@@ -66,22 +66,15 @@ ul.related_post li small {
 }
 
 @media screen and (max-width: 480px) {
-	ul.related_post li {
-		display: block !important;
-		width: auto !important;
-		clear: both !important;
-	}
-	ul.related_post li a:nth-child(1) {
-		float: left !important;
-	}
-	ul.related_post li a:nth-child(2) {
-		font-size: 14px !important;
-		padding: 10px 0 10px 110px !important;
-		display: block !important;
-		height: 80px !important;
-	}
-	ul.related_post li img {
-		width: 100px !important;
-		height: 100px !important;
+	ul.related_post {
+		-moz-column-count: auto !important;
+		-moz-column-gap: normal !important;
+		-moz-column-rule: none !important;
+		-webkit-column-count:auto !important; 
+		-webkit-column-gap: normal !important;
+		-webkit-column-rule: none !important;
+		column-count: auto !important;
+		column-gap: normal !important;
+		column-rule: none !important;
 	}
 }

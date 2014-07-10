@@ -258,6 +258,13 @@ function zem_is_classic() {
 	return false;
 }
 
+function zem_rp_migrate_1_9() {
+	$meta = get_option('zem_rp_meta');
+	$meta['version'] = '1.9.1';
+	$meta['new_user'] = false;
+	update_option('zem_rp_meta', $meta);
+}
+
 function zem_rp_migrate_1_8_2() {
 	$meta = get_option('zem_rp_meta');
 	$meta['version'] = '1.9';
