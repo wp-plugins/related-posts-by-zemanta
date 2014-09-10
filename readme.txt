@@ -3,7 +3,7 @@ Contributors: zemanta
 Tags: zemanta,related,posts,post,related posts,plugin,related content
 License: GPLv2
 Requires at least: 3.3
-Tested up to: 3.9.1
+Tested up to: 4.0
 Stable tag: 1.9.1
 
 Zemanta recommends your content to new audiences both on your blog and across our network of high-quality sites.
@@ -36,6 +36,16 @@ No, Zemanta does not use redirects and is juice friendly. :)
 = Why does Zemanta have 3 similar plugins? What's the difference between them? =
 
 We adopted the principle of having three "release channels". You can try the most experimental (still stable!) features in [Related Posts](http://wordpress.org/extend/plugins/related-posts/ "Related Posts"). The more advanced ones are in [WordPress Related Posts](http://wordpress.org/extend/plugins/wordpress-23-related-posts-plugin/ "WordPress Related Posts"). If you're looking for the pro-like version go for [Related Posts by Zemanta](http://wordpress.org/extend/plugins/related-posts-by-zemanta/ "Related Posts by Zemanta").
+
+= What about Terms of Service and Privacy policy? =
+
+Before using the plugin please read the full version of [Zemanta Terms of Service](http://www.zemanta.com/legal/terms-of-service/) and [Zemanta Privacy Policy](http://www.zemanta.com/legal/privacy/).
+
+
+== Terms of Service ==
+
+The plugin source code is released under GPLv2. Usage of plugin is governed by [Zemanta Terms of Service](http://www.zemanta.com/legal/terms-of-service/) and [Zemanta Privacy Policy](http://www.zemanta.com/legal/privacy/).	
+
 
 == Installation ==
 
