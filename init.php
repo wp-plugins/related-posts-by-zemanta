@@ -5,7 +5,7 @@ if (defined('WP_RP_VERSION') || defined('ZEM_RP_VERSION')) {
 	return;
 }
 
-define('ZEM_RP_VERSION', '1.9.1');
+define('ZEM_RP_VERSION', '1.9.2');
 
 define('ZEM_RP_PLUGIN_FILE', plugin_basename(__FILE__));
 
@@ -97,6 +97,8 @@ function zem_rp_get_platform_options() {
 function zem_rp_ajax_load_articles_callback() {
 	global $post;
 
+	$platform_options = zem_rp_get_platform_options();
+
 	$getdata = stripslashes_deep($_GET);
 	if (!isset($getdata['post_id'])) {
 		die('error');
@@ -140,11 +142,22 @@ function zem_rp_ajax_load_articles_callback() {
 	$response_list = array();
 
 	foreach (array_slice($related_posts, $from) as $related_post) {
+		$excerpt_max_length = $platform_options["excerpt_max_length"];
+		$excerpt = $related_post->post_excerpt;
+		if (!$excerpt) {
+			$excerpt = strip_shortcodes(strip_tags($related_post->post_content));
+		}
+		if ($excerpt) {
+			if (strlen($excerpt) > $excerpt_max_length) {
+				$excerpt = zem_rp_text_shorten($excerpt, $excerpt_max_length);
+			}
+		}
+		
 		array_push($response_list, array(
 				'id' => $related_post->ID,
 				'url' => get_permalink($related_post->ID),
 				'title' => $related_post->post_title,
-				'excerpt' => $related_post->post_excerpt,
+				'excerpt' => $excerpt,
 				'date' => $related_post->post_date,
 				'comments' => $related_post->comment_count,
 				'img' => zem_rp_get_post_thumbnail_img($related_post, $image_size)
@@ -227,6 +240,17 @@ function zem_rp_get_next_post(&$related_posts, &$selected_related_posts, &$inser
 	return $post;
 }
 
+function zem_rp_text_shorten($text, $max_chars) {
+	$shortened_text = mb_substr($text, 0, $max_chars - strlen(ZEM_RP_EXCERPT_SHORTENED_SYMBOL));
+	$shortened_words = explode(" ", $shortened_text);
+	$shortened_size = count($shortened_words);
+	if ($shortened_size > 1) {
+		$shortened_words = array_slice($shortened_words, 0, $shortened_size - 1);
+		$shortened_text = implode(" ", $shortened_words);
+	}
+	return $shortened_text . ZEM_RP_EXCERPT_SHORTENED_SYMBOL; //'...';
+}
+
 function zem_rp_generate_related_posts_list_items($related_posts, $selected_related_posts) {
 	$options = zem_rp_get_options();
 	$platform_options = zem_rp_get_platform_options();
@@ -299,7 +323,7 @@ function zem_rp_generate_related_posts_list_items($related_posts, $selected_rela
 
 			if ($excerpt) {
 				if (strlen($excerpt) > $excerpt_max_length) {
-					$excerpt = mb_substr($excerpt, 0, $excerpt_max_length - 3) . '...';
+					$excerpt = zem_rp_text_shorten($excerpt, $excerpt_max_length);
 				}
 				$output .= '<small class="wp_rp_excerpt">' . $excerpt . '</small>';
 			}
