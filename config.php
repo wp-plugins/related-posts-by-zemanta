@@ -49,6 +49,7 @@ define("ZEM_RP_RECOMMENDATIONS_NUM_PREGENERATED_POSTS", 50);
 define("ZEM_RP_THUMBNAILS_NUM_PREGENERATED_POSTS", 50);
 
 define("ZEM_RP_MAX_LABEL_LENGTH", 32);
+define("ZEM_RP_EXCERPT_SHORTENED_SYMBOL", " [&hellip;]");
 
 global $zem_rp_options, $zem_rp_meta, $zem_global_notice_pages;
 $zem_rp_options = false;
@@ -256,6 +257,13 @@ function zem_is_classic() {
 		return true;
 	}
 	return false;
+}
+
+function zem_rp_migrate_1_9_1() {
+	$meta = get_option('zem_rp_meta');
+	$meta['version'] = '1.9.2';
+	$meta['new_user'] = false;
+	update_option('zem_rp_meta', $meta);
 }
 
 function zem_rp_migrate_1_9() {
