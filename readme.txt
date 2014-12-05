@@ -25,7 +25,7 @@ Here's a few other features you might enjoy:
 * Responsive themes for desktop, tablet, and mobile
 * Like writing CSS? Customize Related Posts with your own code!
 
-Customize the look and feel of Zemanta’s Related Posts plugin by navigating to WordPress Dashboard > Settings > Related Posts by Zemanta
+Customize the look and feel of Zemanta's Related Posts plugin by navigating to WordPress Dashboard > Settings > Related Posts by Zemanta
 
 If you have any questions getting started, please let us know! Send us an email to support@zemanta.com. We'd love to hear from you.
 
