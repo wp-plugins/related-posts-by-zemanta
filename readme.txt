@@ -13,9 +13,21 @@ Zemanta recommends your content to new audiences both on your blog and across ou
 
 = Welcome nRelate users! =
 
-Zemanta Related Posts can increase your internal traffic up to 10%. Zemanta also brings new visitors from other sites and bumps your site's unique visits. Add Related Rosts from your own site and from across the web. Search for posts and hand-pick them with ease.
-Easily increase your reach and readership with Zemanta.
-Recommendations are provided by Zemanta's world-class semantic service.
+Our friends at nRelate recently announced that they will be discontinuing their popular nRelate for WordPress plugin and recommendations service. If you're joining us from nRelate, we'd like to thank you for choosing Related Posts by Zemanta!
+
+Similar to nRelate, Related Posts by Zemanta brings new visitors to your site, helping you increase your reach and readership.
+
+Related Posts is unique because it gives you the option to editorially curate related content for each post, or let Zemanta automatically recommend sources from around the web -- OR BOTH!
+
+Here's a few other features you might enjoy:
+
+* In-Text links recommendations from popular sources such as Wikipedia, IMDB, and YouTube
+* Responsive themes for desktop, tablet, and mobile
+* Like writing CSS? Customize Related Posts with your own code!
+
+Customize the look and feel of Zemanta’s Related Posts plugin by navigating to WordPress Dashboard > Settings > Related Posts by Zemanta
+
+If you have any questions getting started, please let us know! Send us an email to support@zemanta.com. We'd love to hear from you.
 
 == Frequently Asked Questions ==
 
