@@ -5,7 +5,7 @@ if (defined('WP_RP_VERSION') || defined('ZEM_RP_VERSION')) {
 	return;
 }
 
-define('ZEM_RP_VERSION', '1.9.2');
+define('ZEM_RP_VERSION', '1.9.3');
 
 define('ZEM_RP_PLUGIN_FILE', plugin_basename(__FILE__));
 
@@ -66,6 +66,10 @@ $zem_rp_output = array();
 function zem_rp_add_related_posts_hook($content) {
 	global $zem_rp_output, $post;
 	$options = zem_rp_get_options();
+
+	if( !is_object($post) ) {
+		return $content;
+	}
 
 	if ($content != "" && $post->post_type === 'post' && (($options["on_single_post"] && is_single()) || (is_feed() && $options["on_rss"]))) {
 		if (!isset($zem_rp_output[$post->ID])) {

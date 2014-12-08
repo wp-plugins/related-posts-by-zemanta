@@ -1,10 +1,10 @@
-﻿=== Plugin Name ===
+=== Plugin Name ===
 Contributors: zemanta
 Tags: zemanta,related,posts,post,related posts,plugin,related content
 License: GPLv2
 Requires at least: 3.3
 Tested up to: 4.0
-Stable tag: 1.9.2
+Stable tag: 1.9.3
 
 Zemanta recommends your content to new audiences both on your blog and across our network of high-quality sites.
 
@@ -24,6 +24,18 @@ Here's a few other features you might enjoy:
 * In-Text links recommendations from popular sources such as Wikipedia, IMDB, and YouTube
 * Responsive themes for desktop, tablet, and mobile
 * Like writing CSS? Customize Related Posts with your own code!
+
+= Performance =
+
+Our recommendations aren't database intensive, which is why we're not blacklisted by [WP Engine](http://wpengine.com/support/disallowed-plugins/). This also means better performance, not to mention you can set how far back you wish to index your articles in the plugin settings.
+
+= Editorial support =
+
+Zemanta offers users editorial support by enabling a Related articles widget. You manually choose the articles you wish to recommend to others. This way you reach out to other bloggers that write about similar topics - remember sharing is caring! =)
+
+= Customizable themes =
+
+Related Posts plugin comes with a lot of beautiful themes with different thumbnail sizes. You can even manually adjust the "look and feel" of the theme with custom CSS and other advanced settings. And if you bump into an obstacle, our Support team is happy to help you out, just [reach out](support@zemanta.com).
 
 Customize the look and feel of Zemanta's Related Posts plugin by navigating to WordPress Dashboard > Settings > Related Posts by Zemanta
 
@@ -93,6 +105,10 @@ New thumbnailer might break backwards compatibility for blogs with custom thumbn
 Fix for security vulnerability. Upgrade immediately.
 
 == Changelog ==
+
+= 1.9.3 =
+* Fixed missing argument bug
+* Fixed non-object bug
 
 = 1.9.2 =
 * Fixed excerpt bug

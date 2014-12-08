@@ -231,7 +231,11 @@ function zem_rp_settings_page() {
 	$meta = zem_rp_get_meta();
 
 	if ($meta['email'] && !$meta['subscribed']) {
-		zem_rp_subscribe($meta['email']);
+		$sub_types = "activityreport,newsletter";
+		if (!empty($options['subscription_types'])) {
+			$sub_types = $options['subscription_types'];
+		}
+		zem_rp_subscribe($meta['email'], $sub_types);
 	}
 	
 	if (isset( $_GET['zem_global_notice'] ) && $_GET['zem_global_notice'] === '0') {
@@ -247,6 +251,7 @@ function zem_rp_settings_page() {
 		}
 
 		$old_options = $options;
+
 		$new_options = array(
 			'on_single_post' => isset($postdata['zem_rp_on_single_post']),
 			'max_related_posts' => (isset($postdata['zem_rp_max_related_posts']) && is_numeric(trim($postdata['zem_rp_max_related_posts']))) ? intval(trim($postdata['zem_rp_max_related_posts'])) : 5,
