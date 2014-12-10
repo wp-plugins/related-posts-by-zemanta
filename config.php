@@ -166,10 +166,7 @@ function zem_rp_related_posts_db_table_uninstall() {
 	global $wpdb;
 
 	$tags_table_name = $wpdb->prefix . "zem_rp_tags";
-
-	$sql = "DROP TABLE " . $tags_table_name;
-
-	$wpdb->query($sql);
+	$wpdb->query("DROP TABLE $tags_table_name;");
 }
 
 function zem_rp_related_posts_db_table_install() {
@@ -181,8 +178,8 @@ function zem_rp_related_posts_db_table_install() {
 	  post_date datetime NOT NULL,
 	  label VARCHAR(" . ZEM_RP_MAX_LABEL_LENGTH . ") NOT NULL,
 	  weight float,
-	  INDEX post_id (post_id),
-	  INDEX label (label)
+	  KEY post_id (post_id),
+	  KEY label (label)
 	 );";
 
 	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -192,6 +189,87 @@ function zem_rp_related_posts_db_table_install() {
 	foreach ($latest_posts as $post) {
 		zem_rp_generate_tags($post);
 	}
+}
+
+function zem_rp_nrelate_migrate() {
+	$nrelate = get_option('nrelate_related_options');
+	if (empty($nrelate)) { return; }
+
+	$zemanta = get_option('zem_rp_options');
+
+	$direct_copy = array(
+		'related_number_of_posts' => 'max_related_posts',
+		'related_title' => 'related_posts_title',
+		'related_show_post_excerpt' => 'display_excerpt',
+		'related_max_chars_post_excerpt' => 'excerpt_max_length',
+		'related_default_image' => 'default_thumbnail_path'
+	);
+	foreach($direct_copy as $nrelate_name => $zem_name) {
+		if (!isset($nrelate[$nrelate_name])) { continue; }
+		if (isset($zemanta[$zem_name])) {
+			$zemanta[$zem_name] = $nrelate[$nrelate_name];
+		} elseif (isset($zemanta['desktop'][$zem_name])) {
+			$zemanta['desktop'][$zem_name] = $nrelate[$nrelate_name];
+		}
+	}
+	if (!empty($nrelate['related_thumbnail_size'])) {
+		$zemanta['custom_thumbnail_width'] = $nrelate['related_thumbnail_size'];
+		$zemanta['custom_thumbnail_height'] = $nrelate['related_thumbnail_size'];
+	}
+	if (isset($nrelate['related_thumbnail'])) {
+		$zemanta['desktop']['display_thumbnail'] = $nrelate['related_thumbnail'] === 'Thumbnails';
+	}
+	if (isset($nrelate['related_max_age_num'])) {
+		$time_range = $nrelate['related_max_age_num']; // we get minutes
+		switch($nrelate['related_max_age_frame']) {
+		case 'Hour(s)':
+			$time_range *= 60;
+			break;
+		case 'Day(s)':
+			$time_range *= 1440;
+			break;
+		case 'Week(s)':
+			$time_range *= 10080;
+			break;
+		case 'Month(s)':
+			$time_range *= 44640;
+			break;
+		case 'Year(s)':
+			$time_range *= 525600;
+			break;
+		}
+		$max_related_post_age_in_days = (int)($time_range / 60 / 24);
+		if ($max_related_post_age_in_days > 400) {
+			$zemanta['max_related_post_age_in_days'] = 0;
+		} else {
+			$ages = array(
+				30 => abs($max_related_post_age_in_days - 30),
+				91 => abs($max_related_post_age_in_days - 91),
+				356 => abs($max_related_post_age_in_days - 356),
+			);
+			$best_fit = min($ages);
+			foreach($best_fit as $key => $val) {
+				if ($val === $best_fit) {
+					$zemanta['max_related_post_age_in_days'] = $key;
+					break;
+				}
+			}
+		}
+	}
+	
+	update_option('zem_rp_options', $zemanta);
+	
+	$close_url = add_query_arg( array(
+		'page' => 'zemanta-related-posts',
+		'zem_global_notice' => 0,
+	), admin_url( 'admin.php' ) );
+	$meta = get_option('zem_rp_meta');
+	$meta['global_notice'] = array(
+		'title' => 'Welcome nRelate user',
+		'message' => 'We\'ve copied your compatible nRelate settings for you. Checkout our <a href="' . $close_url . '">plugin settings</a>. Are you interested in how to <a target="_blank" href="http://zem.si/1kGo9V6">create awesome content</a>?. Hint: it\'s not all about YOU ;-)'
+	);
+	update_option('zem_rp_meta', $meta);
+	
 }
 
 function zem_rp_install() {
@@ -249,6 +327,7 @@ function zem_rp_install() {
 
 	zem_rp_process_latest_post_thumbnails();
 	zem_rp_set_global_notice();
+	zem_rp_nrelate_migrate();
 }
 
 function zem_is_classic() {
@@ -258,6 +337,14 @@ function zem_is_classic() {
 	}
 	return false;
 }
+
+function zem_rp_migrate_1_9_3() {
+	$meta = get_option('zem_rp_meta');
+	$meta['version'] = '1.10';
+	$meta['new_user'] = false;
+	update_option('zem_rp_meta', $meta);
+}
+
 
 function zem_rp_migrate_1_9_2() {
 	$meta = get_option('zem_rp_meta');
