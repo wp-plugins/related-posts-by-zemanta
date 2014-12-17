@@ -3,8 +3,8 @@ Contributors: zemanta
 Tags: zemanta,related,posts,post,related posts,plugin,related content
 License: GPLv2
 Requires at least: 3.3
-Tested up to: 4.0
-Stable tag: 1.9.3
+Tested up to: 4.1
+Stable tag: 1.10
 
 Zemanta recommends your content to new audiences both on your blog and across our network of high-quality sites.
 
@@ -39,6 +39,16 @@ Related Posts plugin comes with a lot of beautiful themes with different thumbna
 
 Customize the look and feel of Zemanta's Related Posts plugin by navigating to WordPress Dashboard > Settings > Related Posts by Zemanta
 
+= nRelate Compatibility =
+To simplify the transition, we added specific support for users switching from nRelate, so that our plugin will automatically use some of your old settings:
+
+* number of posts to show in the widget
+* related title above the widget
+* show excerpts of articles or not
+* max age of articles to be recommended
+* thumbnail size
+* default thumbnail
+
 If you have any questions getting started, please let us know! Send us an email to support@zemanta.com. We'd love to hear from you.
 
 == Frequently Asked Questions ==
@@ -70,7 +80,7 @@ Before using the plugin please read the full version of [Zemanta Terms of Servic
 
 == Terms of Service ==
 
-The plugin source code is released under GPLv2. Usage of plugin is governed by [Zemanta Terms of Service](http://www.zemanta.com/legal/terms-of-service/) and [Zemanta Privacy Policy](http://www.zemanta.com/legal/privacy/).	
+The plugin source code is released under GPLv2. Usage of our service is governed by [Zemanta Terms of Service](http://www.zemanta.com/legal/terms-of-service/) and [Zemanta Privacy Policy](http://www.zemanta.com/legal/privacy/).	
 
 
 == Installation ==
@@ -105,6 +115,11 @@ New thumbnailer might break backwards compatibility for blogs with custom thumbn
 Fix for security vulnerability. Upgrade immediately.
 
 == Changelog ==
+
+= 1.10 =
+* Automatic nRelate settings migration
+* Additional database optimization for recommendation engine
+* Fixed possible database errors after plugin upgrade
 
 = 1.9.3 =
 * Fixed missing argument bug
