@@ -150,6 +150,7 @@ function zem_rp_cron_do_extract_images_from_post($post_id, $attachment_id) {
 	// Prevent multiple thumbnail extractions for a single post
 	if (get_post_meta($post_id, '_zem_rp_image', true) !== '') { return; }
 
+	$post_id = str_replace("in_", "", "$post_id");
 	$post_id = (int) $post_id;
 	$attachment_id = (int) $attachment_id;
 	$post = get_post($post_id);
@@ -173,8 +174,10 @@ function zem_rp_extract_images_from_post($post, $attachment_id=null) {
 	//if(empty($post->post_content) && !$attachment_id) { return; }
 	if(empty($post->post_content) ) { return; }
 
-	delete_post_meta($post->ID, '_zem_rp_image');
-	wp_schedule_single_event(time(), 'zem_rp_cron_extract_images_from_post', array($post->ID, $attachment_id));
+	$post_id = str_replace("in_", "", "$post->ID");
+	delete_post_meta($post_id, '_zem_rp_image');
+	
+	wp_schedule_single_event(time(), 'zem_rp_cron_extract_images_from_post', array($post_id, $attachment_id));
 }
 
 
@@ -215,6 +218,8 @@ function zem_rp_get_default_thumbnail_url($seed = false, $size = 'thumbnail') {
 	$options = zem_rp_get_options();
 	$upload_dir = wp_upload_dir();
 
+	$seed = (int)$seed;
+	
 	if ($options['default_thumbnail_path']) {
 		return $options['default_thumbnail_path'];
 	} else {
@@ -294,22 +299,26 @@ function zem_rp_get_image_data($image_id) {
 }
 
 function zem_rp_get_attached_img_url($related_post, $size) {
-	$extracted_image = get_post_meta($related_post->ID, '_zem_rp_image', true);
-	if ($extracted_image === 'empty') { return false; }
+	$post_id = str_replace("in_", "", "$related_post->ID");
+	$extracted_image = get_post_meta($post_id, '_zem_rp_image', true);
+
+	if ($extracted_image === 'empty') {
+		return false;
+	}
 
 	$image_data = zem_rp_get_image_data((int)$extracted_image);
 	if (!$image_data && $extracted_image) {
 		// image_id in the db is incorrect
-		delete_post_meta($related_post->ID, '_zem_rp_image');
+		delete_post_meta($post_id, '_zem_rp_image');
 	}
 
-	if (!$image_data && has_post_thumbnail($related_post->ID)) {
-		$image_data = zem_rp_get_image_data(get_post_thumbnail_id($related_post->ID));
+	if (!$image_data && has_post_thumbnail($post_id)) {
+		$image_data = zem_rp_get_image_data(get_post_thumbnail_id($post_id));
 	}
 
 	if (!$image_data && function_exists('get_post_format_meta') && function_exists('img_html_to_post_id')) {
 		// WP 3.6 Image post format. Check wp-includes/media.php:get_the_post_format_image for the reference.
-		$meta = get_post_format_meta($related_post->ID);
+		$meta = get_post_format_meta($post_id);
 		if (!empty($meta['image'])) {
 			if (is_numeric($meta['image'])) {
 				$image_id = absint($meta['image']);
@@ -328,7 +337,6 @@ function zem_rp_get_attached_img_url($related_post, $size) {
 	if ($img_src = zem_rp_get_image_with_exact_size($image_data, $size)) {
 		return $img_src['url'];
 	}
-
 	zem_rp_extract_images_from_post($related_post, $image_data['id']);
 	return false;
 }
@@ -358,23 +366,32 @@ function zem_rp_get_post_thumbnail_img($related_post, $size = null, $force = fal
 		return false;
 	}
 
+	$post_id = str_replace("in_", "", "$related_post->ID");
 	$post_title = wptexturize($related_post->post_title);
-
-	if (property_exists($related_post, 'thumbnail')) {
-		return zem_rp_get_img_tag($related_post->thumbnail, $post_title, $size);
-	}
 
 	$size = zem_rp_get_thumbnail_size_array($size);
 	if (!$size) { return false; }
 
 	if ($options['thumbnail_use_custom']) {
-		$thumbnail_src = get_post_meta($related_post->ID, $options["thumbnail_custom_field"], true);
+		$thumbnail_src = get_post_meta($post_id, $options["thumbnail_custom_field"], true);
 
 		if ($thumbnail_src) {
 			return zem_rp_get_img_tag($thumbnail_src, $post_title, $size);
 		}
 	}
-
+	
+	$featured_image = get_post_thumbnail_id($post_id);
+	if ($featured_image) {
+		$featured_image_data = zem_rp_get_image_data($featured_image);
+		$featured_image_thumb = zem_rp_get_image_with_exact_size($featured_image_data, $size);
+		if ($featured_image_thumb) {
+			return zem_rp_get_img_tag($featured_image_thumb["url"],
+									  $post_title, $size);
+		} else {
+			return get_the_post_thumbnail($post_id, $size);
+		}
+	}
+	
 	$attached_img_url = zem_rp_get_attached_img_url($related_post, $size);
 	if ($attached_img_url) {
 		return zem_rp_get_img_tag($attached_img_url, $post_title, $size);
