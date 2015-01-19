@@ -123,6 +123,7 @@ function zem_rp_actually_extract_images_from_post_html($post) {
 	foreach ($html_tags as $html_tag) {
 		if (preg_match('#src=([\'"])(.+?)\1#is', $html_tag, $matches) && !empty($matches)) {
 			$url = $matches[2];
+			if (substr($url, 0, 2) == '//') { $url = "http:$url"; }
 
 			$attachment_id = zem_rp_get_image_from_img_tag($post->ID, $url, $html_tag);
 			if ($attachment_id) {
@@ -242,6 +243,7 @@ function zem_rp_get_image_with_exact_size($image_data, $size) {
 	$platform_options = zem_rp_get_platform_options();
 	$img_url = wp_get_attachment_url($image_data['id']);
 	$img_url_basename = wp_basename($img_url);
+	$pinterest = $size[1] === 0;
 
 	// Calculate exact dimensions for proportional images
 	if (!$size[0]) { $size[0] = (int) ($image_data['data']['width'] / $image_data['data']['height'] * $size[1]); }
@@ -269,7 +271,15 @@ function zem_rp_get_image_with_exact_size($image_data, $size) {
 
 	foreach ($image_data['data']['sizes'] as $_size => $data) {
 		// width and height can be both string and integers. WordPress..
-		if (($size[0] == $data['width']) && ($size[1] == $data['height'])) {
+		$width_ok = ($size[0] == $data['width']);
+		// Pinterest fix (don't match exact sizes, we could be wrong
+		if ($pinterest) {
+			$height_ok = ($size[1] < $data['height'] + 5) && ($size[1] > $data['height'] - 5);
+		} else {
+			$height_ok = ($size[1] == $data['height']);
+		}
+		
+		if ($width_ok && $height_ok) {
 			$file = $data['file'];
 			$img_url = str_replace($img_url_basename, wp_basename($file), $img_url);
 			return array(
