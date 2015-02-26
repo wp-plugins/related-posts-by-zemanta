@@ -5,7 +5,7 @@ if (defined('WP_RP_VERSION') || defined('ZEM_RP_VERSION')) {
 	return;
 }
 
-define('ZEM_RP_VERSION', '1.11.1');
+define('ZEM_RP_VERSION', '1.12');
 
 define('ZEM_RP_PLUGIN_FILE', plugin_basename(__FILE__));
 

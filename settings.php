@@ -1,5 +1,7 @@
 <?php
 
+include_once(dirname(__FILE__) . '/uploader.php');
+
 /**
 * Add settings link to installed plugins list
 **/
@@ -233,9 +235,15 @@ function zem_rp_settings_page() {
 	if ($meta['email'] && !$meta['subscribed']) {
 		$sub_types = "activityreport,newsletter";
 		if (!empty($options['subscription_types'])) {
-			$sub_types = $options['subscription_types'];
+			$sub_types = $options['subscription_types']; 
 		}
 		zem_rp_subscribe($meta['email'], $sub_types);
+	}
+
+	$articles_count = zem_rp_article_count($meta['zemanta_api_key']);
+	$articles_uploaded = false;
+	if (isset( $_GET['zem_upload_articles'] ) && !empty($meta['zemanta_api_key'])) {
+		$articles_uploaded = zem_rp_upload_articles($meta['zemanta_api_key']);
 	}
 	
 	if (isset( $_GET['zem_global_notice'] ) && $_GET['zem_global_notice'] === '0') {

@@ -34,6 +34,8 @@ define("ZEM_RP_STATIC_PINTEREST_JS_FILE", "js/pinterest.js");
 
 define("ZEM_RP_ZEMANTA_DASHBOARD_URL", "http://prefs.zemanta.com/dash/");
 define("ZEM_RP_ZEMANTA_SUBSCRIPTION_URL", "http://prefs.zemanta.com/api/");
+define("ZEM_RP_ZEMANTA_UPLOAD_URL", "http://prefs.zemanta.com/api/upload-articles/");
+define("ZEM_RP_ZEMANTA_ARTICLE_COUNT_URL", "http://prefs.zemanta.com/api/article-count/");
 define("ZEM_RP_ZEMANTA_API_URL", "http://api.zemanta.com/services/rest/0.0/");
 define('ZEM_RP_ZEMANTA_CONTENT_BASE_URL', 'https://content.zemanta.com/static/');
 
@@ -337,6 +339,14 @@ function zem_is_classic() {
 	}
 	return false;
 }
+
+function zem_rp_migrate_1_12() {
+	$meta = get_option('zem_rp_meta');
+	$meta['version'] = '1.12';
+	$meta['new_user'] = false;
+	update_option('zem_rp_meta', $meta);
+}
+
 
 function zem_rp_migrate_1_11() {
 	$meta = get_option('zem_rp_meta');
