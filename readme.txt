@@ -3,7 +3,7 @@ Contributors: zemanta
 Tags: zemanta,related,posts,post,related posts,plugin,related content
 License: GPLv2
 Requires at least: 3.3
-Tested up to: 4.2
+Tested up to: 4.3
 Stable tag: 1.12
 
 Zemanta recommends your content to new audiences both on your blog and across our network of high-quality sites.
