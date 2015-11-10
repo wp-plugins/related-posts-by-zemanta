@@ -56,6 +56,10 @@ ul.related_post li a img {
 	float: none !important;
 }
 
+ul.related_post li .wp_rp_category a {
+	display: inline !important;
+}
+
 ul.related_post li a img.zem_rp_santa_hat {
 	display: none !important;
 }

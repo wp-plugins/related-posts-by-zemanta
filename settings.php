@@ -279,6 +279,7 @@ function zem_rp_settings_page() {
 				'display_comment_count' => isset($postdata['zem_rp_desktop_display_comment_count']),
 				'display_publish_date' => isset($postdata['zem_rp_desktop_display_publish_date']),
 				'display_excerpt' => isset($postdata['zem_rp_desktop_display_excerpt']),
+				'display_category' => isset($postdata['zem_rp_desktop_display_category']),
 				'excerpt_max_length' => (isset($postdata['zem_rp_desktop_excerpt_max_length']) && is_numeric(trim($postdata['zem_rp_desktop_excerpt_max_length']))) ? intval(trim($postdata['zem_rp_desktop_excerpt_max_length'])) : 200,
 				'custom_theme_enabled' => isset($postdata['zem_rp_desktop_custom_theme_enabled'])
 			)

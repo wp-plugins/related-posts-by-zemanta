@@ -315,6 +315,7 @@ function zem_rp_install() {
 			'display_publish_date'			=> false,
 			'display_thumbnail'			=> true,
 			'display_excerpt'			=> false,
+			'display_category'			=> false,
 			'excerpt_max_length'			=> 200,
 			'theme_name' 				=> 'vertical.css',
 			'theme_custom_css'			=> ZEM_RP_DEFAULT_CUSTOM_CSS,
@@ -341,6 +342,17 @@ function zem_is_classic() {
 }
 
 function zem_rp_migrate_1_12() {
+	$meta = get_option('zem_rp_meta');
+	$meta['version'] = '1.13';
+	$meta['new_user'] = false;
+	update_option('zem_rp_meta', $meta);
+
+	$options = get_option('zem_rp_options');
+	$options['desktop']['display_category'] = false;
+	update_option('zem_rp_options', $options);
+}
+
+function zem_rp_migrate_1_11_1() {
 	$meta = get_option('zem_rp_meta');
 	$meta['version'] = '1.12';
 	$meta['new_user'] = false;
