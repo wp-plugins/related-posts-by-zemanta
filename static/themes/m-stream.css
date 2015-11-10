@@ -62,7 +62,9 @@ ul.related_post li img {
 	border-radius: 3px !important;
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
 }
-
+ul.related_post li .wp_rp_category a {
+	display: inline !important;
+}
 ul.related_post li a img.zem_rp_santa_hat {
 	display: none !important;
 }

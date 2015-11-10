@@ -5,7 +5,7 @@ if (defined('WP_RP_VERSION') || defined('ZEM_RP_VERSION')) {
 	return;
 }
 
-define('ZEM_RP_VERSION', '1.12');
+define('ZEM_RP_VERSION', '1.13');
 
 define('ZEM_RP_PLUGIN_FILE', plugin_basename(__FILE__));
 
@@ -255,7 +255,7 @@ function zem_rp_text_shorten($text, $max_chars) {
 	return $shortened_text . ZEM_RP_EXCERPT_SHORTENED_SYMBOL; //'...';
 }
 
-function zem_rp_generate_related_posts_list_items($related_posts, $selected_related_posts) {
+function zem_rp_generate_related_posts_list_items($related_posts, $selected_related_posts, $post_categories) {
 	$options = zem_rp_get_options();
 	$platform_options = zem_rp_get_platform_options();
 	$output = "";
@@ -331,6 +331,21 @@ function zem_rp_generate_related_posts_list_items($related_posts, $selected_rela
 				}
 				$output .= '<small class="wp_rp_excerpt">' . $excerpt . '</small>';
 			}
+		}
+		if ($platform_options["display_category"] && !empty($post_categories)){
+			$output .= ' <small class="wp_rp_category">Posted in ';
+			$num_categories = 0;
+			$id = $related_post->ID;
+			if (strpos($id, "in_") !== false) { $id = substr($id, 3); }
+			foreach($post_categories[$id] as $cat_id => $cat_name) {
+				$cat_url = esc_url(get_category_link($cat_id));
+				if ($num_categories > 0) {
+					$output .= ', ';
+				}
+				$output .= '<a href="' . $cat_url . '" target="_parent">' . $cat_name . '</a>';
+				$num_categories++;
+			}
+			$output .= '</small>';
 		}
 		$output .=  '</li>';
 	}
@@ -452,6 +467,11 @@ function zem_rp_get_related_posts() {
 	$platform_options = zem_rp_get_platform_options();
 	$meta = zem_rp_get_meta();
 
+	$post_categories = array();
+	if ($platform_options["display_category"]){
+		$post_categories = zem_rp_get_post_categories();
+	}
+
 	$posts_and_title = zem_rp_fetch_posts_and_title();
 	$related_posts = $posts_and_title['posts'];
 	$title = $posts_and_title['title'];
@@ -478,7 +498,7 @@ function zem_rp_get_related_posts() {
 	$css_classes_wrap = str_replace(array('.css', '-'), array('', '_'), esc_attr('zem_rp_th_' . $platform_options['theme_name']));
 
 	if ($related_posts) {
-		$related_posts_lis = zem_rp_generate_related_posts_list_items($related_posts, $selected_related_posts);
+		$related_posts_lis = zem_rp_generate_related_posts_list_items($related_posts, $selected_related_posts, $post_categories);
 		$related_posts_ul = '<ul class="' . $css_classes . '">' . $related_posts_lis . '</ul>';
 
 		$related_posts_content = $title ? '<h3 class="related_post_title">' . $title . '</h3>' : '';

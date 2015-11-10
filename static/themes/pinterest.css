@@ -102,6 +102,10 @@ ul.related_post li a.zem_rp_title {
 	text-indent: 0 !important;
 }
 
+ul.related_post li .wp_rp_category a {
+	display: inline !important;
+}
+
 ul.related_post li a.zem_rp_thumbnail {
 	display:block !important;
 	clear:both !important;

@@ -338,3 +338,23 @@ function zem_rp_fetch_random_posts($limit = 10, $exclude_ids = array()) {
 	array_multisort($ids_keys, $results);
 	return $results;
 }
+
+function zem_rp_get_post_categories() {
+	global $wpdb;
+	
+	$post_query = "SELECT p.ID as pid, te.name as cat_name, te.term_id as cat_id
+		FROM $wpdb->posts p, $wpdb->terms te, $wpdb->term_taxonomy tt, $wpdb->term_relationships tr
+		WHERE p.post_status = 'publish' AND p.post_type = 'post'
+			AND tt.taxonomy='category' AND tt.term_id = te.term_id
+			AND tr.object_id = p.ID AND tt.term_taxonomy_id = tr.term_taxonomy_id";
+	$posts = $wpdb->get_results($post_query);
+
+	$result = array();
+	foreach($posts as $row) {
+		if (!isset($result[$row->pid])) {
+			$result[$row->pid] = array();
+		}
+		$result[$row->pid][$row->cat_id] = $row->cat_name;
+	}
+	return $result;
+}

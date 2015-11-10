@@ -81,6 +81,9 @@ ul.related_post li a {
 ul.related_post li a.zem_rp_title {
 	margin-top: 3px !important;
 }
+ul.related_post li .wp_rp_category a {
+	display: inline !important;
+}
 ul.related_post li img {
 	display: block !important;
 	width: 100px !important;

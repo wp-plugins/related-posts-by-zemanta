@@ -71,6 +71,10 @@ ul.related_post li small {
 	font-size: 80%;
 }
 
+ul.related_post li .wp_rp_category a {
+	display: inline !important;
+}
+
 @media screen and (max-width: 480px) {
 	ul.related_post li {
 		display: inline-block !important;

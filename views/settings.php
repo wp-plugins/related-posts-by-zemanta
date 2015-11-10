@@ -136,7 +136,12 @@
 									</label>
 									<label id="zem_rp_desktop_excerpt_max_length_label">
 										<input name="zem_rp_desktop_excerpt_max_length" type="text" id="zem_rp_desktop_excerpt_max_length" class="small-text" value="<?php esc_attr_e($options['desktop']["excerpt_max_length"]); ?>" /> <span class="description"><?php _e('Maximum Number of Characters.', 'zemanta_related_posts'); ?></span>
+									</label><br />
+									<label>
+										<input name="zem_rp_desktop_display_category" type="checkbox" id="zem_rp_desktop_display_category" value="yes"<?php checked($options['desktop']["display_category"]); ?>>
+										<?php _e("Display Post Categories",'zemanta_related_posts');?>
 									</label>
+								
 									<br/>
 									<h4><?php _e('Custom CSS','zemanta_related_posts'); ?></h4>
 									<textarea style="width: 300px; height: 215px; background: #EEE;" name="zem_rp_desktop_theme_custom_css" class="custom-css"><?php echo htmlspecialchars($options['desktop']['theme_custom_css'], ENT_QUOTES); ?></textarea>
